@@ -1,0 +1,15 @@
+{
+  "name": "Naive",
+  "version": "0.1.0",
+  "description": "A simple, configurable text editor written in Electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thomas Smith <thsm@umich.edu>",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^2.0.7"
+  }
+}

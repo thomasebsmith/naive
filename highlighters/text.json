@@ -1,0 +1,14 @@
+{
+  "tokenTypes": [
+    {
+      "regex": "[\\s\\S]",
+      "name": "plain"
+    }
+  ],
+  "tokens": {
+    "plain": {
+      "breakOn": "$^",
+      "className": "plain"
+    }
+  }
+}

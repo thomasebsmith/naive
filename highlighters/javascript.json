@@ -1,0 +1,22 @@
+{
+  "tokenTypes": [
+    {
+      "name": "whitespace",
+      "regex": "\\s"
+    },
+    {
+      "name": "number",
+      "regex": "[0-9]"
+    }
+  ],
+  "tokens": {
+    "whitespace": {
+      "breakOn": "\\S",
+      "className": "plain"
+    },
+    "number": {
+      "breakAfter": "(0[box])?((\\.[0-9]+)|([0-9]+(\\.[0-9]*)?))",
+      "className": "number"
+    }
+  }
+}

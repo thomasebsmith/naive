@@ -1,0 +1,65 @@
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: var(--user-background);
+}
+
+#content {
+  font-family: var(--user-font);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  padding-top: 3%;
+  padding-left: 6px;
+}
+
+.plain {
+  color: var(--user-plain-color);
+  font-weight: var(--user-plain-weight);
+  font-style: var(--user-plain-style);
+}
+.keyword {
+  color: var(--user-keyword-color);
+  font-weight: var(--user-keyword-weight);
+  font-style: var(--user-keyword-style);
+}
+.operator {
+  color: var(--user-operator-color);
+  font-weight: var(--user-operator-weight);
+  font-style: var(--user-operator-style);
+}
+.number {
+  color: var(--user-number-color);
+  font-weight: var(--user-number-weight);
+  font-style: var(--user-number-style);
+}
+.string {
+  color: var(--user-string-color);
+  font-weight: var(--user-string-weight);
+  font-style: var(--user-string-style);
+}
+.comment {
+  color: var(--user-comment-color);
+  font-weight: var(--user-comment-weight);
+  font-style: var(--user-comment-style);
+}
+.docComment {
+  color: var(--user-docComment-color);
+  font-weight: var(--user-docComment-weight);
+  font-style: var(--user-docComment-style);
+}
+.invalid {
+  color: var(--user-invalid-color);
+  font-weight: var(--user-invalid-weight);
+  font-style: var(--user-invalid-style);
+}
+.identifier {
+  color: var(--user-identifier-color);
+  font-weight: var(--user-identifier-weight);
+  font-style: var(--user-identifier-style);
+}
+.builtInValue {
+  color: var(--user-builtInValue-color);
+  font-weight: var(--user-builtInValue-weight);
+  font-style: var(--user-builtInValue-style);
+}
