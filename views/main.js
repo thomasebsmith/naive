@@ -23,14 +23,28 @@ const definedMessages = {
     sendMessageToMain({
       type: "showOpenDialog",
       data: {
-        properties: ["openDirectory", "createDirectory"]
+        properties: ["openDirectory", "openFile", "createDirectory"]
       }
     }, (projectPath) => {
       projectPath = projectPath[0];
-      loadProject({
-        name: path.basename(projectPath),
-        path: projectPath,
-        selectedRelativePath: null
+      fs.stat(projectPath, (err, stats) => {
+        if (err) {
+          console.error("There was an error loading the project with path ", projectPath, ": ", err);
+        }
+        else if (stats.isDirectory()){
+          loadProject({
+            name: path.basename(projectPath),
+            path: projectPath,
+            selectedRelativePath: null
+          });
+        }
+        else {
+          loadProject({
+            name: path.basename(path.dirname(projectPath)),
+            path: path.dirname(projectPath),
+            selectedRelativePath: path.basename(projectPath)
+          });
+        }
       });
     });
   }
