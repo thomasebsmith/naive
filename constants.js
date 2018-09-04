@@ -1,3 +1,4 @@
 module.exports = {
-  appName: "Naive"
+  appName: "Naive",
+  contentLoaded: "contentLoaded"
 };

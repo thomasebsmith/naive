@@ -1,5 +1,6 @@
 const require = parent.require.bind(window);
 
+const constants = require("../constants");
 const highlight = require("../highlight");
 const { htmlFromArray } = require("../htmlUtilities");
 
@@ -49,5 +50,5 @@ document.addEventListener("DOMContentLoaded", () => {
   for (let i = 0; i < messageQueue.length; i++) {
     evaluateMessage(messageQueue[i]);
   }
-  parent.postMessage("loaded", location.origin);
+  parent.postMessage(constants.contentLoaded, location.origin);
 });

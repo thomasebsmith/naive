@@ -1,9 +1,12 @@
+const {ipcRenderer} = require("electron");
+
 const fs = require("fs");
 const path = require("path");
 
 const constants = require("../constants");
 const prefs = new (require("../prefs"))();
 const getMimeType = require("../getMimeType");
+const {sendMessageToMain} = require("../rendererMessaging");
 
 const titleEl = document.getElementsByTagName("title")[0];
 
@@ -13,6 +16,24 @@ let frameLoaded = false;
 
 const setTitle = (title) => {
   titleEl.textContent = title;
+};
+
+const definedMessages = {
+  "loadProject": () => {
+    sendMessageToMain({
+      type: "showOpenDialog",
+      data: {
+        properties: ["openDirectory", "createDirectory"]
+      }
+    }, (projectPath) => {
+      projectPath = projectPath[0];
+      loadProject({
+        name: path.basename(projectPath),
+        path: projectPath,
+        selectedRelativePath: null
+      });
+    });
+  }
 };
 
 const contentAction = (action, ...args) => {
@@ -31,13 +52,13 @@ let currentProject = null;
 const loadFileContent = (filePath) => {
   fs.readFile(filePath, (err, content) => {
     if (err) {
-      contentAction("set", "There was an error loading the file at " + filePath);
       contentAction("setLanguage", "text/x-editor-error");
+      contentAction("set", "There was an error loading the file at " + filePath);
       console.warn("Could not load file ", filePath, "(error: ", err, ")");
     }
     else {
-      contentAction("set", content.toString());
       contentAction("setLanguage", getMimeType(path.parse(filePath).ext.substring(1)));
+      contentAction("set", content.toString());
     }
   });
 };
@@ -57,27 +78,46 @@ const loadSidebarContent = (project) => {
       el.textContent = projectName + " — Files";
       filesEl.appendChild(el);
       for (let f of projectFiles) {
-        el = document.createElement("span");
+        el = document.createElement("div");
         el.classList.add("fileName");
         el.textContent = f;
+        el.addEventListener("click", () => setProjectFile(f));
         filesEl.appendChild(el);
       }
     }
   });
 };
 
+const storeProject = () => {
+  localStorage.setItem("project", JSON.stringify(currentProject));
+};
+
+const setProjectFile = (relativePath) => {
+  currentProject.selectedRelativePath = relativePath;
+  storeProject();
+  reloadFileContent();
+};
+
+const reloadFileContent = () => {
+  setTitle(constants.appName + " — " + currentProject.name + " — " + currentProject.selectedRelativePath);
+  if (currentProject.selectedRelativePath === null) {
+    contentAction("set", "No file is open");
+    contentAction("setLanguage", "text/x-editor-error");
+  }
+  else {
+    loadFileContent(path.join(currentProject.path, currentProject.selectedRelativePath));
+  }
+};
 
 const loadProject = (project) => {
   currentProject = project;
-  localStorage.setItem("project", JSON.stringify(project));
+  storeProject();
   if (currentProject === null) {
     contentAction("set", "No project exists");
     contentAction("setLanguage", "text/x-editor-error");
   }
   else {
-    setTitle(constants.appName + " — " + project.name + " — " +
-project.selectedRelativePath);
-    loadFileContent(path.join(project.path, project.selectedRelativePath));
+    reloadFileContent();
     loadSidebarContent(project);
   }
 };
@@ -87,11 +127,22 @@ const onContentLoaded = () => {
   loadProject(JSON.parse(localStorage.getItem("project")));
 };
 
+ipcRenderer.on("message", (event, data) => {
+  if (definedMessages.hasOwnProperty(data.type)) {
+    definedMessages[data.type](data.data);
+  }
+  else {
+    console.error("Invalid message", data);
+  }
+});
+
 window.addEventListener("message", (event) => {
-  if (event.origin === location.origin && event.data === "loaded") {
-    frameLoaded = true;
-    if (domLoaded) {
-      onContentLoaded();
+  if (event.origin === location.origin) {
+    if (event.data === constants.contentLoaded) {
+      frameLoaded = true;
+      if (domLoaded) {
+        onContentLoaded();
+      }
     }
   }
 });
@@ -106,5 +157,3 @@ document.addEventListener("DOMContentLoaded", () => {
     onContentLoaded();
   }
 });
-
-

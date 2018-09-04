@@ -63,7 +63,7 @@ const highlightWith = (highlighter, code) => {
         tokenType = defaultTokenType;
       }
     }
-    if (tokenType.hasOwnProperty("breakOn")) {
+    else if (tokenType.hasOwnProperty("breakOn")) {
       tokenType.breakOn.lastIndex = i;
       if (tokenType.breakOn.test(code)) {
         i--;

@@ -4,7 +4,9 @@
   "description": "A simple, configurable text editor written in Electron",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "ELECTRON_IS_DEVELOPER=1 electron .",
+    "start-debug": "ELECTRON_IS_DEVELOPER=1 electron --inspect .",
+    "start-production": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Thomas Smith <thsm@umich.edu>",
