@@ -77,7 +77,7 @@ const loadFileContent = (filePath) => {
   });
 };
 
-const loadSidebarContent = (project) => {
+const loadSidebarContent = (project, callback) => {
   const projectPath = project.path;
   const projectName = project.name;
   fs.readdir(projectPath, (err, projectFiles) => {
@@ -99,6 +99,7 @@ const loadSidebarContent = (project) => {
         filesEl.appendChild(el);
       }
     }
+    callback();
   });
 };
 
@@ -113,12 +114,24 @@ const setProjectFile = (relativePath) => {
 };
 
 const reloadFileContent = () => {
+  const selectedEl = document.querySelector(".fileName.selected");
+  if (selectedEl !== null) {
+    selectedEl.classList.remove("selected");
+  }
   setTitle(constants.appName + " — " + currentProject.name + " — " + currentProject.selectedRelativePath);
   if (currentProject.selectedRelativePath === null) {
     contentAction("set", "No file is open");
     contentAction("setLanguage", "text/x-editor-error");
   }
   else {
+    let el;
+    for (let i = 0; i < filesEl.children.length; i++) {
+      el = filesEl.children[i];
+      if (el.textContent === currentProject.selectedRelativePath &&
+          el.classList.contains("fileName")) {
+        el.classList.add("selected");
+      }
+    }
     loadFileContent(path.join(currentProject.path, currentProject.selectedRelativePath));
   }
 };
@@ -131,8 +144,7 @@ const loadProject = (project) => {
     contentAction("setLanguage", "text/x-editor-error");
   }
   else {
-    reloadFileContent();
-    loadSidebarContent(project);
+    loadSidebarContent(project, () => reloadFileContent());
   }
 };
 
