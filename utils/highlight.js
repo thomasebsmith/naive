@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const highlighterDirectory = "./highlighters/";
+const highlighterDirectory = "../highlighters/";
 
 const highlighters = {
   "application/javascript": "javascript",
@@ -105,7 +105,7 @@ const highlight = (code, language) => {
         highlighter = highlighterName;
       }
       else {
-        const fileContent = fs.readFileSync(path.join(highlighterDirectory, highlighterName + ".json")).toString();
+        const fileContent = fs.readFileSync(path.join(__dirname, highlighterDirectory, highlighterName + ".json")).toString();
         highlighter = JSON.parse(fileContent);
         highlighters[language] = highlighter;
       }

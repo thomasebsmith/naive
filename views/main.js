@@ -3,10 +3,10 @@ const {ipcRenderer} = require("electron");
 const fs = require("fs");
 const path = require("path");
 
-const constants = require("../constants");
-const prefs = new (require("../prefs"))();
-const getMimeType = require("../getMimeType");
-const {sendMessageToMain} = require("../rendererMessaging");
+const constants = require("../utils/constants");
+const prefs = new (require("../utils/prefs"))();
+const getMimeType = require("../utils/getMimeType");
+const {sendMessageToMain} = require("../utils/rendererMessaging");
 
 const titleEl = document.getElementsByTagName("title")[0];
 

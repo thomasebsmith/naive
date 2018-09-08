@@ -1,8 +1,8 @@
 const require = parent.require.bind(window);
 
-const constants = require("../constants");
-const highlight = require("../highlight");
-const { htmlFromArray } = require("../htmlUtilities");
+const constants = require("../utils/constants");
+const highlight = require("../utils/highlight");
+const { htmlFromArray } = require("../utils/htmlUtilities");
 
 let language = "text/plain";
 let contentEl = null;

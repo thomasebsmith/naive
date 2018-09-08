@@ -5,8 +5,8 @@ const {
   getWindows,
   getFocusedWindow,
   sendWindowMessage
-} = require("./window");
-const setMenus = require("./menus");
+} = require("./utils/window");
+const setMenus = require("./utils/menus");
 
 const definedMessages = {
   "openWindow": () => {
