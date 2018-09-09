@@ -1,4 +1,4 @@
-const { BrowserWindow } = require("electron");
+const { BrowserWindow, ipcMain } = require("electron");
 
 const isProduction = require("./isProduction");
 const constants = require("./constants");
@@ -9,6 +9,17 @@ if (!isProduction) {
 const windows = [];
 const messageQueue = [];
 let focusedWindow = null;
+
+ipcMain.on("message", (event, data) => {
+  if (data.type === "window-loaded") {
+    if (windows[data.data]) {
+      windows[data.data].show();
+    }
+    else {
+      console.error("Invalid window-loaded message ", data);
+    }
+  }
+});
 
 exports.Windows = {
   "main": {
@@ -25,7 +36,8 @@ exports.openWindow = (type) => {
     width: type.width,
     height: type.height,
     minWidth: type.minWidth,
-    minHeight: type.minHeight
+    minHeight: type.minHeight,
+    show: false // Don't show window until it is loaded
   });
   win.loadFile(type.file);
   let id = windows.push(win) - 1;
@@ -41,6 +53,10 @@ exports.openWindow = (type) => {
   win.on("closed", () => {
     windows[id] = null;
     messageQueue[id] = null;
+  });
+  exports.sendWindowMessage(win, {
+    type: "id",
+    data: id
   });
 };
 

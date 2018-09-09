@@ -13,6 +13,8 @@ const titleEl = document.getElementsByTagName("title")[0];
 let sidebarEl, sidebarButtonsEl, filesEl, contentEl;
 let domLoaded = false;
 let frameLoaded = false;
+let completelyLoaded = false;
+let windowID = null;
 
 const setTitle = (title) => {
   titleEl.textContent = title;
@@ -20,7 +22,7 @@ const setTitle = (title) => {
 
 const definedMessages = {
   "loadProject": () => {
-    sendMessageToMain({
+    sendAsyncMessageToMain({
       type: "showOpenDialog",
       data: {
         properties: ["openDirectory", "openFile", "createDirectory"]
@@ -47,6 +49,15 @@ const definedMessages = {
         }
       });
     });
+  },
+  "id": (id) => {
+    windowID = id;
+    if (completelyLoaded) {
+      sendMessageToMain({
+        type: "window-loaded",
+        data: windowID
+      });
+    }
   }
 };
 
@@ -63,7 +74,7 @@ const applyStyles = (style) => {
 
 let currentProject = null;
 
-const loadFileContent = (filePath) => {
+const loadFileContent = (filePath, callback = noop) => {
   fs.readFile(filePath, (err, content) => {
     if (err) {
       contentAction("setLanguage", "text/x-editor-error");
@@ -74,10 +85,11 @@ const loadFileContent = (filePath) => {
       contentAction("setLanguage", getMimeType(path.parse(filePath).ext.substring(1)));
       contentAction("set", content.toString());
     }
+    callback();
   });
 };
 
-const loadSidebarContent = (project, callback) => {
+const loadSidebarContent = (project, callback = noop) => {
   const projectPath = project.path;
   const projectName = project.name;
   fs.readdir(projectPath, (err, projectFiles) => {
@@ -113,7 +125,7 @@ const setProjectFile = (relativePath) => {
   reloadFileContent();
 };
 
-const reloadFileContent = () => {
+const reloadFileContent = (callback) => {
   const selectedEl = document.querySelector(".fileName.selected");
   if (selectedEl !== null) {
     selectedEl.classList.remove("selected");
@@ -132,11 +144,11 @@ const reloadFileContent = () => {
         el.classList.add("selected");
       }
     }
-    loadFileContent(path.join(currentProject.path, currentProject.selectedRelativePath));
+    loadFileContent(path.join(currentProject.path, currentProject.selectedRelativePath), callback);
   }
 };
 
-const loadProject = (project) => {
+const loadProject = (project, callback = constants.noop) => {
   currentProject = project;
   storeProject();
   if (currentProject === null) {
@@ -144,13 +156,21 @@ const loadProject = (project) => {
     contentAction("setLanguage", "text/x-editor-error");
   }
   else {
-    loadSidebarContent(project, () => reloadFileContent());
+    loadSidebarContent(project, () => reloadFileContent(callback));
   }
 };
 
 const onContentLoaded = () => {
   applyStyles(prefs.get("style"));
-  loadProject(JSON.parse(localStorage.getItem("project")));
+  loadProject(JSON.parse(localStorage.getItem("project")), () => {
+    completelyLoaded = true;
+    if (windowID !== null) {
+      sendMessageToMain({
+        type: "window-loaded",
+        data: windowID
+      });
+    }
+  });
 };
 
 ipcRenderer.on("message", (event, data) => {

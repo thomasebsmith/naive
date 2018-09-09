@@ -1,4 +1,5 @@
 module.exports = {
   appName: "Naive",
-  contentLoaded: "contentLoaded"
+  contentLoaded: "contentLoaded",
+  noop: () => {}
 };
