@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { htmlFromArray } = require("../utils/htmlUtilities");
 
 const highlighterDirectory = "../highlighters/";
 
@@ -14,19 +15,12 @@ const defaultTokenType = {
   className: "plain"
 };
 
-const highlightWith = (highlighter, code) => {
-  let broken = true;
-  let token = "";
-  let tokenType = null;
-  let tokenTypeName;
-  const tokenTypes = highlighter.tokenTypes;
-  const tokens = highlighter.tokens;
-  const result = [];
+const formatHighlighter = (highlighter) => {
   if (highlighter.__formatted__ !== highlighterFormattedKey) {
-    for (let t of tokenTypes) {
+    for (let t of highlighter.tokenTypes) {
       t.regex = new RegExp(t.regex, "y");
     }
-    for (let t of Object.values(tokens)) {
+    for (let t of Object.values(highlighter.tokens)) {
       if (t.hasOwnProperty("breakOn")) {
         t.breakOn = new RegExp(t.breakOn, "y");
       }
@@ -36,17 +30,63 @@ const highlightWith = (highlighter, code) => {
     }
     highlighter.__formatted__ = highlighterFormattedKey;
   }
-  for (let i = 0; i < code.length; i++) {
+};
+
+const rehighlightHTML = (highlighter, code, element, index) => {
+  let i = index;
+  const elementList = element.children;
+  formatHighlighter(highlighter);
+  let highlighted, done;
+  const generator = generateHighlightedToken(
+    highlighter, code, elementList[index].dataset.startIndex
+  );
+  const newTokens = [];
+  while ({done, value: highlighted} = generator.next() && !done) {
+    while (highlighted.data.startIndex > elementList[i].dataset.startIndex) {
+      i++;
+    } 
+    if (elementList[i].dataset.startIndex === highlighted.data.startIndex &&
+      elementList[i].dataset.tokenTypeName === highlighted.data.tokenTypeName) {
+      break;
+    }
+    newTokens.push(highlighted);
+  }
+  // Now, replace the HTML elements that are no longer up-to-date
+  for (let j = i - 1; j >= index; j--) {
+    element.removeChild(elementList[j]);
+  }
+  const newElements = htmlFromArray(newTokens);
+  const elementToInsertBefore = i >= elementList.length ? null : elementList[i];
+  for (let el of newElements) {
+    element.insertBefore(el, elementToInsertBefore);
+  }
+};
+
+function* generateHighlightedToken(highlighter, code, startIndex = 0) {
+  let broken = true;
+  let token = "";
+  let tokenType = null;
+  let tokenTypeName;
+  let tokenStartIndex = 0;
+  const tokenTypes = highlighter.tokenTypes;
+  const tokens = highlighter.tokens;
+  
+  formatHighlighter(highlighter);
+
+  for (let i = startIndex; i < code.length; i++) {
     if (broken) {
       broken = false;
       if (tokenType !== null) {
-        result.push({
+        yield ({
           text: token,
-          className: tokenType.className
+          tokenTypeName: tokenTypeName,
+          className: tokenType.className,
+          startIndex: tokenStartIndex
         });
       }
       token = "";
       tokenType = null;
+      tokenStartIndex = i;
       for (let j = 0; j < tokenTypes.length; j++) {
         tokenTypes[j].regex.lastIndex = i;
         if (tokenTypes[j].regex.test(code)) {
@@ -88,14 +128,22 @@ const highlightWith = (highlighter, code) => {
       token += code.charAt(i);
     }
   }
-  result.push({
+  yield ({
     text: token,
     className: tokenType.className
   });
+}
+
+const highlightWith = (highlighter, code) => {
+  const generator = generateHighlightedToken(highlighter, code);
+  const result = [];
+  for (let token of generator) {
+    result.push(token);
+  }
   return result;
 };
 
-const highlight = (code, language) => {
+const highlight = (code, language, element = null, index = null) => {
   try {
     if (highlighters.hasOwnProperty(language)) {
       const highlighterName = highlighters[language];
@@ -108,6 +156,9 @@ const highlight = (code, language) => {
         const fileContent = fs.readFileSync(path.join(__dirname, highlighterDirectory, highlighterName + ".json")).toString();
         highlighter = JSON.parse(fileContent);
         highlighters[language] = highlighter;
+      }
+      if (element !== null && index !== null) {
+        return rehighlightHTML(highlighter, code, element, index);
       }
       return highlightWith(highlighter, code);
     }

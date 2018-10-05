@@ -74,7 +74,7 @@ const applyStyles = (style) => {
 
 let currentProject = null;
 
-const loadFileContent = (filePath, callback = noop) => {
+const loadFileContent = (filePath, callback = constants.noop) => {
   fs.readFile(filePath, (err, content) => {
     if (err) {
       contentAction("setLanguage", "text/x-editor-error");

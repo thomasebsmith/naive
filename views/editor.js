@@ -6,10 +6,53 @@ const { htmlFromArray } = require("../utils/htmlUtilities");
 
 let language = "text/plain";
 let contentEl = null;
+let currentText = "";
+
+const reposition = (startingElementIndex) => {
+  let nextIndex = startingElementIndex.dataset.filePosition;
+  for (let i = startingElementIndex; i < contentEl.children.length; i++) {
+    contentEl.children[i].dataset.filePosition = nextIndex;
+    nextIndex += contentEl.children[i].textContent.length;
+  }
+};
+
+const rehighlight = (startingElementIndex) => {
+  highlight(currentText, language, contentEl, startingElementIndex);
+  reposition(startingelementIndex);
+};
 
 const messageQueue = [];
 const actions = {
+  "insert": (position, text) => {
+    if (contentEl.children.length === 0) {
+      actions.set(text);
+    }
+    else {
+      let i;
+      for (i = 0; i < contentEl.children.length; i++) {
+        let nextPosition = contentEl.children.dataset.filePosition;
+        if (nextPosition > position) {
+          break;
+        }
+      }
+      i--; // Now contentEl.children[i] should be the element to insert into
+      let element = contentEl.children[i];
+      let elementPosition = element.dataset.filePosition;
+      let elementContent = element.textContent;
+      let actualPosition = Math.min(
+        position - elementPosition,
+        elementContent.length
+      );
+      elementContent = elementContent.substring(0, actualPosition) + text +
+        elementContent.substring(actualPosition);
+      element.textContent = elementContent;
+      rehighlight(i);
+      currentText = currentText.substring(0, elementPosition + actualPosition) +
+        text + currentText.substring(elementPosition + actualPosition);
+    }
+  },
   "set": (content) => {
+    currentText = content;
     contentEl.innerHTML = "";
     htmlFromArray(highlight(content, language), contentEl);
   },
