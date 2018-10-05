@@ -9,16 +9,40 @@ let contentEl = null;
 let currentText = "";
 
 const reposition = (startingElementIndex) => {
-  let nextIndex = startingElementIndex.dataset.filePosition;
+  let nextIndex = +contentEl.children[startingElementIndex].dataset.startIndex;
   for (let i = startingElementIndex; i < contentEl.children.length; i++) {
-    contentEl.children[i].dataset.filePosition = nextIndex;
+    contentEl.children[i].dataset.startIndex = nextIndex;
     nextIndex += contentEl.children[i].textContent.length;
   }
 };
 
 const rehighlight = (startingElementIndex) => {
+  reposition(startingElementIndex);
   highlight(currentText, language, contentEl, startingElementIndex);
-  reposition(startingelementIndex);
+};
+
+const remove = (elementIndex) => {
+  contentEl.removeChild(contentEl.children[elementIndex]);
+};
+
+const getElementIndex = (position) => {
+  let i;
+  for (i = 0; i < contentEl.children.length; i++) {
+    let nextPosition = +contentEl.children[i].dataset.startIndex;
+    if (nextPosition > position) {
+      break;
+    }
+  }
+  i--;
+  return i;
+};
+
+const getRelativePosition = (element, position) => {
+  const elementPosition = +element.dataset.startIndex;
+  return Math.min(
+    position - elementPosition,
+    element.textContent.length
+  );
 };
 
 const messageQueue = [];
@@ -28,28 +52,39 @@ const actions = {
       actions.set(text);
     }
     else {
-      let i;
-      for (i = 0; i < contentEl.children.length; i++) {
-        let nextPosition = contentEl.children.dataset.filePosition;
-        if (nextPosition > position) {
-          break;
-        }
-      }
-      i--; // Now contentEl.children[i] should be the element to insert into
-      let element = contentEl.children[i];
-      let elementPosition = element.dataset.filePosition;
+      const elementIndex = getElementIndex(position);
+      const element = contentEl.children[elementIndex];
+      const elementPosition = +element.dataset.startIndex;
       let elementContent = element.textContent;
-      let actualPosition = Math.min(
-        position - elementPosition,
-        elementContent.length
-      );
+      const actualPosition = getRelativePosition(element, position);
       elementContent = elementContent.substring(0, actualPosition) + text +
         elementContent.substring(actualPosition);
       element.textContent = elementContent;
-      rehighlight(i);
       currentText = currentText.substring(0, elementPosition + actualPosition) +
         text + currentText.substring(elementPosition + actualPosition);
+      rehighlight(elementIndex);
     }
+  },
+  "remove": (position, count) => {
+    const elementIndex = getElementIndex(position);
+    let element = contentEl.children[elementIndex];
+    let relativePosition = getRelativePosition(element, position);
+    currentText = currentText.substring(0, position) +
+                  currentText.substring(position + count);
+    let removedChars = 0;
+    let elementContent;
+    while (removedChars < count && element !== null) {
+      elementContent = element.textContent;
+      charsToRemove = Math.min(
+        count - removedChars, elementContent.length - relativePosition
+      );
+      element.textContent = elementContent.substring(0, relativePosition) +
+                  elementContent.substring(relativePosition + charsToRemove);
+      removedChars += charsToRemove;
+      relativePosition = 0;
+      element = element.nextElementSibling;
+    }
+    rehighlight(elementIndex);
   },
   "set": (content) => {
     currentText = content;

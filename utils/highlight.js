@@ -38,36 +38,44 @@ const rehighlightHTML = (highlighter, code, element, index) => {
   formatHighlighter(highlighter);
   let highlighted, done;
   const generator = generateHighlightedToken(
-    highlighter, code, elementList[index].dataset.startIndex
+    highlighter, code, +elementList[index].dataset.startIndex
   );
   const newTokens = [];
-  while ({done, value: highlighted} = generator.next() && !done) {
-    while (highlighted.data.startIndex > elementList[i].dataset.startIndex) {
+  while (({done, value: highlighted} = generator.next()) && !done) {
+    while (i < elementList.length &&
+           highlighted.data.startIndex > +elementList[i].dataset.startIndex) {
       i++;
     } 
-    if (elementList[i].dataset.startIndex === highlighted.data.startIndex &&
+    if (+elementList[i].dataset.startIndex === highlighted.data.startIndex &&
       elementList[i].dataset.tokenTypeName === highlighted.data.tokenTypeName) {
       break;
     }
     newTokens.push(highlighted);
+    if (i >= elementList.length) {
+      break;
+    }
   }
   // Now, replace the HTML elements that are no longer up-to-date
   for (let j = i - 1; j >= index; j--) {
     element.removeChild(elementList[j]);
   }
   const newElements = htmlFromArray(newTokens);
-  const elementToInsertBefore = i >= elementList.length ? null : elementList[i];
+  const elementToInsertBefore = index >= elementList.length ? null : elementList[index];
   for (let el of newElements) {
     element.insertBefore(el, elementToInsertBefore);
   }
 };
 
 function* generateHighlightedToken(highlighter, code, startIndex = 0) {
+  if (code.length - startIndex === 0) {
+    return [];
+  }
+
   let broken = true;
   let token = "";
   let tokenType = null;
   let tokenTypeName;
-  let tokenStartIndex = 0;
+  let tokenStartIndex = startIndex;
   const tokenTypes = highlighter.tokenTypes;
   const tokens = highlighter.tokens;
   
@@ -79,9 +87,11 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
       if (tokenType !== null) {
         yield ({
           text: token,
-          tokenTypeName: tokenTypeName,
           className: tokenType.className,
-          startIndex: tokenStartIndex
+          data: {
+            tokenTypeName: tokenTypeName,
+            startIndex: tokenStartIndex
+          }
         });
       }
       token = "";
@@ -130,7 +140,11 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
   }
   yield ({
     text: token,
-    className: tokenType.className
+    className: tokenType.className,
+    data: {
+      tokenTypeName: tokenTypeName,
+      startIndex: tokenStartIndex
+    }
   });
 }
 
@@ -170,7 +184,11 @@ const highlight = (code, language, element = null, index = null) => {
   return [
     {
       className: "plain",
-      text: code
+      text: code,
+      data: {
+        startIndex: 0,
+        tokenTypeName: "__default__"
+      }
     }
   ];
 };
