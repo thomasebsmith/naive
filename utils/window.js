@@ -76,3 +76,9 @@ exports.sendWindowMessage = (win, msg) => {
     messageQueue[id].push(msg);
   }
 };
+
+exports.forceShowWindows = () => {
+  for (let win of windows) {
+    win.show();
+  }
+};

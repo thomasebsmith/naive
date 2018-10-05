@@ -50,7 +50,11 @@ const setMenus = (sendAction) => {
       label: "Developer",
       submenu: [
         {role: "reload"},
-        {role: "toggledevtools"}
+        {role: "toggledevtools"},
+        {
+          label: "Force Windows to Show",
+          click: () => sendAction({type: "forceShowWindows"})
+        }
       ]
     });
   }

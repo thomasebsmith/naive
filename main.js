@@ -4,7 +4,8 @@ const {
   openWindow,
   getWindows,
   getFocusedWindow,
-  sendWindowMessage
+  sendWindowMessage,
+  forceShowWindows
 } = require("./utils/window");
 const setMenus = require("./utils/menus");
 
@@ -12,6 +13,9 @@ const definedMessages = {
   "openWindow": () => {
     openWindow(Windows.main);
   },
+  "forceShowWindows": () => {
+    forceShowWindows();
+  }
 };
 
 const asyncMessages = {
