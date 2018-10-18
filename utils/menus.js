@@ -54,6 +54,10 @@ const setMenus = (sendAction) => {
         {
           label: "Force Windows to Show",
           click: () => sendAction({type: "forceShowWindows"})
+        },
+        {
+          label: "Reset Preferences",
+          click: () => sendAction({type: "resetPreferences"})
         }
       ]
     });

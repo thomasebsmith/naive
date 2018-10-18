@@ -8,6 +8,7 @@ const {
   forceShowWindows
 } = require("./utils/window");
 const setMenus = require("./utils/menus");
+const prefs = new (require("./utils/prefs"))();
 
 const definedMessages = {
   "openWindow": () => {
@@ -15,6 +16,9 @@ const definedMessages = {
   },
   "forceShowWindows": () => {
     forceShowWindows();
+  },
+  "resetPreferences": () => {
+    prefs.reset();
   }
 };
 

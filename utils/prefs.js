@@ -2,12 +2,16 @@ const electron = require("electron");
 const path = require("path");
 const fs = require("fs");
 
+const resetFile = (filePath, defaultValues) => {
+  fs.writeFileSync(filePath, JSON.stringify(defaultValues));
+};
+
 const getFileData = (filePath, defaultValues) => {
   try {
     return JSON.parse(fs.readFileSync(filePath));
   }
   catch (e) {
-    fs.writeFileSync(filePath, JSON.stringify(defaultValues));
+    resetFile(filePath, defaultValues);
     return defaultValues;
   }
 };
@@ -16,8 +20,9 @@ class UserDataFile {
   constructor(fileName, defaultValues) {
     const userDataPath = (electron.app ||
 electron.remote.app).getPath("userData");
+    this.defaultValues = defaultValues;
     this.path = path.join(userDataPath, fileName + ".json");
-    this.data = getFileData(this.path, defaultValues);
+    this.data = getFileData(this.path, this.defaultValues);
   }
   get(key) {
     if (this.data[key] === undefined) {
@@ -28,6 +33,9 @@ electron.remote.app).getPath("userData");
   set(key, value) {
     this.data[key] = value;
     fs.writeFileSync(this.path, JSON.stringify(this.data));
+  }
+  reset() {
+    resetFile(this.path, this.defaultValues);
   }
 }
 
@@ -40,6 +48,9 @@ const defaultPrefs = {
     content: {
       background: "#000000",
       font: "monospace",
+      selection: {
+        background: "#777777"
+      },
       plain: {
         color: "#FFFFFF",
       },

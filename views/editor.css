@@ -13,6 +13,10 @@ body {
   padding-left: 6px;
 }
 
+.cursor {
+  background-color: var(--user-selection-background);
+}
+
 .plain {
   color: var(--user-plain-color);
   font-weight: var(--user-plain-weight);

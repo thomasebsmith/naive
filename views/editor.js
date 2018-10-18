@@ -7,6 +7,8 @@ const { htmlFromArray } = require("../utils/htmlUtilities");
 let language = "text/plain";
 let contentEl = null;
 let currentText = "";
+let cursorEl = null;
+let cursorPosition = null;
 
 const reposition = (startingElementIndex) => {
   let nextIndex = +contentEl.children[startingElementIndex].dataset.startIndex;
@@ -47,6 +49,40 @@ const getRelativePosition = (element, position) => {
 
 const messageQueue = [];
 const actions = {
+  "cursorTo": (position) => {
+    if (position === cursorPosition) { return; }
+    if (position < 0) { position = 0; }
+    const elementIndex = getElementIndex(position);
+    const element = contentEl.children[elementIndex];
+    const actualPosition = Math.min(
+      getRelativePosition(element, position),
+      element.textContent.length - 1
+    );
+    cursorPosition = Math.min(actualPosition + (+element.dataset.startIndex));
+    if (cursorEl !== null) {
+      cursorEl.parentElement.textContent =
+        cursorEl.parentElement.textContent;
+    }
+    cursorEl = document.createElement("span");
+    cursorEl.classList.add("cursor");
+    let elementText = element.textContent;
+    const character = elementText.charAt(actualPosition);
+    cursorEl.textContent = character;
+    element.textContent = elementText =
+      elementText.substring(0, actualPosition) +
+      elementText.substring(actualPosition + 1);
+    const range = document.createRange();
+    const node = elementText.length === 0 ? element : element.firstChild;
+    range.setStart(node, actualPosition);
+    range.setEnd(node, actualPosition);
+    range.insertNode(cursorEl);
+  },
+  "cursorLeft": () => {
+    actions.cursorTo(cursorPosition - 1);
+  },
+  "cursorRight": () => {
+    actions.cursorTo(cursorPosition + 1);
+  },
   "insert": (position, text) => {
     if (contentEl.children.length === 0) {
       actions.set(text);
@@ -90,6 +126,8 @@ const actions = {
     currentText = content;
     contentEl.innerHTML = "";
     htmlFromArray(highlight(content, language), contentEl);
+    cursorEl = null;
+    actions.cursorTo(0);
   },
   "setLanguage": (lang) => {
     language = lang;
