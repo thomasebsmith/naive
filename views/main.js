@@ -7,6 +7,8 @@ const constants = require("../utils/constants");
 const prefs = new (require("../utils/prefs"))();
 const getMimeType = require("../utils/getMimeType");
 const {sendMessageToMain} = require("../utils/rendererMessaging");
+const contentAction = require("../utils/contentAction");
+const { handleKeys } = require("../utils/keyhandling");
 
 const titleEl = document.getElementsByTagName("title")[0];
 
@@ -58,11 +60,10 @@ const definedMessages = {
         data: windowID
       });
     }
+  },
+  "contentAction": (data) => {
+    contentAction(data.action, ...data.args);
   }
-};
-
-const contentAction = (action, ...args) => {
-  contentEl.contentWindow.postMessage({ action, args }, location.origin);
 };
 
 const applyStyles = (style) => {
@@ -192,6 +193,8 @@ window.addEventListener("message", (event) => {
     }
   }
 });
+
+handleKeys(window, contentAction);
 
 document.addEventListener("DOMContentLoaded", () => {
   sidebarEl = document.getElementById("sidebar");

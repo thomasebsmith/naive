@@ -1,8 +1,32 @@
-const require = parent.require.bind(window);
+window.requireProps = {};
+const require = (filename) => {
+  const parentRequire = parent.require;
+  const absolutePath = parentRequire.resolve(filename);
+  let result;
+  const oldIsEditor = parent.isEditor;
+  const oldEditorWindow = parent.editorWindow;
+  parent.isEditor = true;
+  parent.editorWindow = window;
+  if (parentRequire.cache[absolutePath]) {
+    const cachedModule = parentRequire.cache[absolutePath];
+    parentRequire.cache[absolutePath] = undefined;
+    result = parentRequire.call(window, filename);
+    parentRequire.cache[absolutePath] = cachedModule;
+  }
+  else {
+    result = parentRequire.call(window, filename);
+    parentRequire.cache[absolutePath] = undefined;
+  }
+  parent.isEditor = oldIsEditor;
+  parent.editorWindow = oldEditorWindow;
+  return result;
+};
 
 const constants = require("../utils/constants");
 const highlight = require("../utils/highlight");
 const { htmlFromArray } = require("../utils/htmlUtilities");
+const contentAction = require("../utils/contentAction");
+const { handleKeys } = require("../utils/keyhandling");
 
 let language = "text/plain";
 let contentEl = null;
@@ -54,12 +78,12 @@ const actions = {
     if (position < 0) { position = 0; }
     const elementIndex = getElementIndex(position);
     const element = contentEl.children[elementIndex];
-    const actualPosition = Math.min(
+    const actualPosition = Math.max(Math.min(
       getRelativePosition(element, position),
-      element.textContent.length - 1
-    );
+      element.textContent.length - 1,
+    ), 0);
     cursorPosition = Math.min(actualPosition + (+element.dataset.startIndex));
-    if (cursorEl !== null) {
+    if (cursorEl !== null && cursorEl.parentElement) {
       cursorEl.parentElement.textContent =
         cursorEl.parentElement.textContent;
     }
@@ -99,6 +123,14 @@ const actions = {
       currentText = currentText.substring(0, elementPosition + actualPosition) +
         text + currentText.substring(elementPosition + actualPosition);
       rehighlight(elementIndex);
+      if (cursorPosition !== null && cursorPosition >= position) {
+        actions.cursorTo(cursorPosition + text.length);
+      }
+    }
+  },
+  "insertAtCursor": (text) => {
+    if (cursorPosition !== null) {
+      actions.insert(cursorPosition, text);
     }
   },
   "remove": (position, count) => {
@@ -121,6 +153,21 @@ const actions = {
       element = element.nextElementSibling;
     }
     rehighlight(elementIndex);
+    if (cursorPosition !== null && position < cursorPosition) {
+      if (position + count >= cursorPosition) {
+        actions.cursorTo(position);
+      }
+      else {
+        actions.cursorTo(cursorPosition - count);
+      }
+    }
+  },
+  "removeBeforeCursor": (count) => {
+    if (cursorPosition !== null) {
+      const removalStartPosition = Math.max(0, cursorPosition - count);
+      count = cursorPosition - removalStartPosition;
+      actions.remove(removalStartPosition, count);
+    }
   },
   "set": (content) => {
     currentText = content;
@@ -145,8 +192,9 @@ const actions = {
     }
   }
 };
+requireProps.actions = actions;
 const evaluateMessage = (data) => {
-  return actions[data.action].apply(actions, data.args);
+  return contentAction(data.action, ...data.args);
 };
 
 window.addEventListener("message", (event) => {
@@ -168,3 +216,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   parent.postMessage(constants.contentLoaded, location.origin);
 });
+
+handleKeys(window, contentAction);
