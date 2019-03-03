@@ -107,6 +107,13 @@ const actions = {
   "cursorRight": () => {
     actions.cursorTo(cursorPosition + 1);
   },
+  "get": (replyID) => {
+    const text = contentEl.textContent;
+    parent.postMessage({
+      replyID: replyID,
+      result: text
+    });
+  },
   "insert": (position, text) => {
     if (contentEl.children.length === 0) {
       actions.set(text);

@@ -90,6 +90,10 @@ const loadFileContent = (filePath, callback = constants.noop) => {
   });
 };
 
+const saveFileContent = (filePath, text, callback = constants.noop) => {
+  fs.writeFile(filePath, text, { encoding: "utf8" }, callback);
+};
+
 const loadSidebarContent = (project, callback = noop) => {
   const projectPath = project.path;
   const projectName = project.name;
@@ -161,6 +165,16 @@ const loadProject = (project, callback = constants.noop) => {
   }
 };
 
+const saveCurrentProject = (callback = constants.noop) => {
+  contentAction("get", addReplyListener((text) => {
+    saveFileContent(
+      path.join(currentProject.path, currentProject.selectedRelativePath),
+      text,
+      callback
+    );
+  }));
+};
+
 const onContentLoaded = () => {
   applyStyles(prefs.get("style"));
   loadProject(JSON.parse(localStorage.getItem("project")), () => {
@@ -183,6 +197,11 @@ ipcRenderer.on("message", (event, data) => {
   }
 });
 
+const replyListeners = [];
+const addReplyListener = (func) => {
+  return replyListeners.push(func) - 1;
+};
+
 window.addEventListener("message", (event) => {
   if (event.origin === location.origin) {
     if (event.data === constants.contentLoaded) {
@@ -190,6 +209,10 @@ window.addEventListener("message", (event) => {
       if (domLoaded) {
         onContentLoaded();
       }
+    }
+    else if (typeof event.data === "object" &&
+             event.data.type === constants.reply) {
+      replyListeners[event.data.replyID](event.data.result);
     }
   }
 });

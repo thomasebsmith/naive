@@ -9,7 +9,6 @@ let isEditor = false;
 if (isHTML && window.isEditor) {
   isEditor = true;
 }
-console.log(window);
 
 let contentAction;
 if (isHTML && isEditor) {
