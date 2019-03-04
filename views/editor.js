@@ -111,8 +111,9 @@ const actions = {
     const text = contentEl.textContent;
     parent.postMessage({
       replyID: replyID,
-      result: text
-    });
+      result: text,
+      type: constants.reply
+    }, location.origin);
   },
   "insert": (position, text) => {
     if (contentEl.children.length === 0) {
