@@ -63,6 +63,9 @@ const definedMessages = {
   },
   "contentAction": (data) => {
     contentAction(data.action, ...data.args);
+  },
+  "saveCurrentProjectFile": () => {
+    saveCurrentProjectFile();
   }
 };
 
@@ -165,7 +168,7 @@ const loadProject = (project, callback = constants.noop) => {
   }
 };
 
-const saveCurrentProject = (callback = constants.noop) => {
+const saveCurrentProjectFile = (callback = constants.noop) => {
   contentAction("get", addReplyListener((text) => {
     saveFileContent(
       path.join(currentProject.path, currentProject.selectedRelativePath),

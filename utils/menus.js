@@ -11,6 +11,11 @@ const setMenus = (sendAction) => {
           label: "Open project",
           accelerator: "CommandOrControl+O",
           click: () => sendAction({type: "loadProject"})
+        },
+        {
+          label: "Save",
+          accelerator: "CommandOrControl+S",
+          click: () => sendAction({type: "saveCurrentProjectFile"})
         }
       ]
     },
