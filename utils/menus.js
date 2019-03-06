@@ -16,6 +16,11 @@ const setMenus = (sendAction) => {
           label: "Save",
           accelerator: "CommandOrControl+S",
           click: () => sendAction({type: "saveCurrentProjectFile"})
+        },
+        {
+          label: "Save As...",
+          accelerator: "CommandOrControl+Shift+S",
+          click: () => sendAction({type: "saveCurrentProjectFileAsDialog"})
         }
       ]
     },

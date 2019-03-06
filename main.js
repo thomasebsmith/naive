@@ -25,6 +25,9 @@ const definedMessages = {
 const asyncMessages = {
   "showOpenDialog": (args, callback) => {
     dialog.showOpenDialog(args, callback);
+  },
+  "showSaveDialog": (args, callback) => {
+    dialog.showSaveDialog(args, callback);
   }
 };
 

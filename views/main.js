@@ -6,7 +6,10 @@ const path = require("path");
 const constants = require("../utils/constants");
 const prefs = new (require("../utils/prefs"))();
 const getMimeType = require("../utils/getMimeType");
-const {sendMessageToMain} = require("../utils/rendererMessaging");
+const {
+  sendMessageToMain,
+  sendAsyncMessageToMain
+} = require("../utils/rendererMessaging");
 const contentAction = require("../utils/contentAction");
 const { handleKeys } = require("../utils/keyhandling");
 
@@ -66,6 +69,23 @@ const definedMessages = {
   },
   "saveCurrentProjectFile": () => {
     saveCurrentProjectFile();
+  },
+  "saveCurrentProjectFileAs": (absolutePath) => {
+    saveCurrentProjectFileAs(absolutePath);
+  },
+  "saveCurrentProjectFileAsDialog": () => {
+    sendAsyncMessageToMain({
+      type: "showSaveDialog",
+      data: {
+        defaultPath: path.join(currentProject.path,
+                               currentProject.selectedRelativePath),
+        title: "Save As"
+      }
+    }, (absolutePath) => {
+      if (absolutePath !== undefined) {
+        saveCurrentProjectFileAs(absolutePath);
+      }
+    });
   }
 };
 
@@ -168,14 +188,17 @@ const loadProject = (project, callback = constants.noop) => {
   }
 };
 
-const saveCurrentProjectFile = (callback = constants.noop) => {
+const saveCurrentProjectFileAs = (absolutePath, callback = constants.noop) => {
   contentAction("get", addReplyListener((text) => {
-    saveFileContent(
-      path.join(currentProject.path, currentProject.selectedRelativePath),
-      text,
-      callback
-    );
+    saveFileContent(absolutePath, text, callback);
   }));
+};
+
+const saveCurrentProjectFile = (callback = constants.noop) => {
+  saveCurrentProjectFileAs(
+    path.join(currentProject.path, currentProject.selectedRelativePath),
+    callback
+  );
 };
 
 const onContentLoaded = () => {
