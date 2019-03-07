@@ -98,23 +98,41 @@ const applyStyles = (style) => {
 
 let currentProject = null;
 
+const updateProjectFileCache = (filePath, content) => {
+  if (currentProject.fileCache === undefined) {
+    currentProject.fileCache = {};
+  }
+  currentProject.fileCache[filePath] = content;
+};
+
 const loadFileContent = (filePath, callback = constants.noop) => {
   fs.readFile(filePath, (err, content) => {
     if (err) {
       contentAction("setLanguage", "text/x-editor-error");
-      contentAction("set", "There was an error loading the file at " + filePath);
+      contentAction("set", "There was an error loading the file at " +
+        filePath);
       console.warn("Could not load file ", filePath, "(error: ", err, ")");
     }
     else {
-      contentAction("setLanguage", getMimeType(path.parse(filePath).ext.substring(1)));
+      updateProjectFileCache(filePath, content.toString());
+      contentAction("setLanguage",
+        getMimeType(path.parse(filePath).ext.substring(1)));
       contentAction("set", content.toString());
     }
-    callback();
+    callback(err);
   });
 };
 
 const saveFileContent = (filePath, text, callback = constants.noop) => {
-  fs.writeFile(filePath, text, { encoding: "utf8" }, callback);
+  fs.writeFile(filePath, text, { encoding: "utf8" }, (err) => {
+    if (err) {
+      console.warn("Could not save file ", filePath, "(err: ", err, ")");
+    }
+    else {
+      updateProjectFileCache(filePath, text);
+    }
+    callback(err);
+  });
 };
 
 const loadSidebarContent = (project, callback = noop) => {
@@ -199,6 +217,11 @@ const saveCurrentProjectFile = (callback = constants.noop) => {
     path.join(currentProject.path, currentProject.selectedRelativePath),
     callback
   );
+};
+
+const fileIsModified = (absolutePath, editorText) => {
+  const cacheResult = currentProject.fileCache[absolutePath];
+  return cacheResult !== editorText;
 };
 
 const onContentLoaded = () => {
