@@ -105,6 +105,13 @@ const updateProjectFileCache = (filePath, content) => {
   currentProject.fileCache[filePath] = content;
 };
 
+const updateProjectEditCache = (filePath, content) => {
+  if (currentProject.editCache === undefined) {
+    currentProject.editCache = {};
+  }
+  currentProject.editCache[filePath] = content;
+};
+
 const loadFileContent = (filePath, callback = constants.noop) => {
   fs.readFile(filePath, (err, content) => {
     if (err) {
@@ -204,6 +211,14 @@ const loadProject = (project, callback = constants.noop) => {
   else {
     loadSidebarContent(project, () => reloadFileContent(callback));
   }
+};
+
+const prepareToLeaveFile = () => {
+  contentAction("get", addReplyListener((text) => {
+    updateProjectEditCache(
+      path.join(currentProject.path, currentProject.selectedRelativePath)
+    );
+  }));
 };
 
 const saveCurrentProjectFileAs = (absolutePath, callback = constants.noop) => {
