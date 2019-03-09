@@ -97,37 +97,56 @@ const applyStyles = (style) => {
 };
 
 let currentProject = null;
+let fileIsLoaded = false;
 
 const updateProjectFileCache = (filePath, content) => {
   if (currentProject.fileCache === undefined) {
-    currentProject.fileCache = {};
+    currentProject.fileCache = Object.create(null);
   }
   currentProject.fileCache[filePath] = content;
 };
 
 const updateProjectEditCache = (filePath, content) => {
   if (currentProject.editCache === undefined) {
-    currentProject.editCache = {};
+    currentProject.editCache = Object.create(null);
   }
   currentProject.editCache[filePath] = content;
 };
 
 const loadFileContent = (filePath, callback = constants.noop) => {
-  fs.readFile(filePath, (err, content) => {
-    if (err) {
-      contentAction("setLanguage", "text/x-editor-error");
-      contentAction("set", "There was an error loading the file at " +
-        filePath);
-      console.warn("Could not load file ", filePath, "(error: ", err, ")");
+  const onFileLeft = () => {
+    const onFileRead = (err, content) => {
+      if (err) {
+        contentAction("setLanguage", "text/x-editor-error");
+        contentAction("set", "There was an error loading the file at " +
+          filePath);
+        console.warn("Could not load file ", filePath, "(error: ", err, ")");
+      }
+      else {
+        updateProjectFileCache(filePath, content.toString());
+        contentAction("setLanguage",
+          getMimeType(path.parse(filePath).ext.substring(1)));
+        contentAction("set", content.toString());
+      }
+      callback(err);
+    };
+
+    if (currentProject.editCache &&
+        currentProject.editCache[filePath] !== undefined) {
+      onFileRead(undefined, currentProject.editCache[filePath]);
     }
     else {
-      updateProjectFileCache(filePath, content.toString());
-      contentAction("setLanguage",
-        getMimeType(path.parse(filePath).ext.substring(1)));
-      contentAction("set", content.toString());
+      fs.readFile(filePath, onFileRead);
     }
-    callback(err);
-  });
+  };
+
+  if (fileIsLoaded) {
+    prepareToLeaveFile(onFileLeft);
+  }
+  else {
+    onFileLeft();
+    fileIsLoaded = true;
+  }
 };
 
 const saveFileContent = (filePath, text, callback = constants.noop) => {
@@ -169,7 +188,11 @@ const loadSidebarContent = (project, callback = noop) => {
 };
 
 const storeProject = () => {
-  localStorage.setItem("project", JSON.stringify(currentProject));
+  localStorage.setItem("project", JSON.stringify({
+    name: currentProject.name,
+    path: currentProject.path,
+    selectedRelativePath: currentProject.selectedRelativePath
+  }));
 };
 
 const setProjectFile = (relativePath) => {
@@ -213,12 +236,22 @@ const loadProject = (project, callback = constants.noop) => {
   }
 };
 
-const prepareToLeaveFile = () => {
+const prepareToLeaveFile = (callback = constants.noop) => {
   contentAction("get", addReplyListener((text) => {
     updateProjectEditCache(
-      path.join(currentProject.path, currentProject.selectedRelativePath)
+      path.join(currentProject.path, currentProject.selectedRelativePath),
+      text
     );
+    callback();
   }));
+};
+
+const attemptToLeaveProject = (callback) => {
+  if (anyProjectFileIsModified()) {
+    callback(false);
+    return;
+  }
+  callback(true);
 };
 
 const saveCurrentProjectFileAs = (absolutePath, callback = constants.noop) => {
@@ -237,6 +270,15 @@ const saveCurrentProjectFile = (callback = constants.noop) => {
 const fileIsModified = (absolutePath, editorText) => {
   const cacheResult = currentProject.fileCache[absolutePath];
   return cacheResult !== editorText;
+};
+
+const anyProjectFileIsModified = () => {
+  for (let i in currentProject.editCache) {
+    if (fileIsModified(i, currentProject.editCache[i])) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const onContentLoaded = () => {
