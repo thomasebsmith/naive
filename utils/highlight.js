@@ -148,7 +148,21 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
   });
 }
 
+const defaultToken = (text) => {
+  return {
+    className: "plain",
+    text: code,
+    data: {
+      startIndex: 0,
+      tokenTypeName: "__default__"
+    }
+  };
+};
+
 const highlightWith = (highlighter, code) => {
+  if (!code) {
+    return defaultToken(code);
+  }
   const generator = generateHighlightedToken(highlighter, code);
   const result = [];
   for (let token of generator) {
@@ -182,14 +196,7 @@ const highlight = (code, language, element = null, index = null) => {
     console.error("Error while highlighting: ", e);
   }
   return [
-    {
-      className: "plain",
-      text: code,
-      data: {
-        startIndex: 0,
-        tokenTypeName: "__default__"
-      }
-    }
+    defaultToken(code)
   ];
 };
 
