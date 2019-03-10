@@ -50,14 +50,13 @@ exports.openWindow = (type) => {
       messageQueue[id] = null;
     }
   });
-  win.on("beforeunload", (e) => {
+  win.on("close", (e) => {
     exports.sendWindowMessage(win, {
       type: "shouldClose"
     });
 
     // Stop the close until main.js receives a reply from the window.
-    e.returnValue = false;
-    return false;
+    e.preventDefault();
   });
 
   win.on("closed", () => {
@@ -69,6 +68,8 @@ exports.openWindow = (type) => {
     data: id
   });
 };
+
+exports.getWindow = (id) => windows[id];
 
 exports.getWindows = () => windows.filter(win => win !== null);
 
@@ -85,6 +86,10 @@ exports.sendWindowMessage = (win, msg) => {
   else {
     messageQueue[id].push(msg);
   }
+};
+
+exports.forceDestroyWindow = (id) => {
+  windows[id].destroy();
 };
 
 exports.forceShowWindows = () => {

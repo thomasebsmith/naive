@@ -2,10 +2,12 @@ const {app, BrowserWindow, dialog, ipcMain} = require("electron");
 const {
   Windows,
   openWindow,
+  getWindow,
   getWindows,
   getFocusedWindow,
   sendWindowMessage,
-  forceShowWindows
+  forceShowWindows,
+  forceDestroyWindow
 } = require("./utils/window");
 const setMenus = require("./utils/menus");
 const prefs = new (require("./utils/prefs"))();
@@ -20,14 +22,14 @@ const definedMessages = {
   "resetPreferences": () => {
     prefs.reset();
   },
-  "closeThisWindow": (args, callback) => {
+  "closeThisWindow": (windowID) => {
     // win.destroy() will bypass the beforeunload listener to prevent an
     //  infinite loop. It will also bypass the "close" event (not currently
     //  used) but will NOT bypass the "closed" event.
-    // TODO: win.destroy();
+    forceDestroyWindow(windowID);
   },
-  "promptToCloseThisWindow": (args, callback) => {
-    dialog.showMessageBox(win, {
+  "promptToCloseThisWindow": (windowID) => {
+    dialog.showMessageBox(getWindow(windowID), {
       type: "question",
       buttons: ["Cancel", "Don't save"],
       cancelId: 0,
@@ -37,7 +39,7 @@ const definedMessages = {
     }, (response) => {
       const DONT_SAVE = 1;
       if (response === DONT_SAVE) {
-        // TODO: win.destroy();
+        forceDestroyWindow(windowID);
       }
     });
   }
@@ -79,6 +81,10 @@ ipcMain.on("asynchronous-message", (event, data) => {
   else {
     console.error("Invalid async message ", data);
   }
+});
+
+ipcMain.on("message", (event, data) => {
+  evaluateMessage(data);
 });
 
 app.on("ready", () => {

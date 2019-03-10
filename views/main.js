@@ -92,11 +92,13 @@ const definedMessages = {
       if (shouldLeave) {
         sendMessageToMain({
           type: "closeThisWindow",
+          data: windowID
         });
       }
       else {
         sendMessageToMain({
-          type: "promptToCloseThisWindow"
+          type: "promptToCloseThisWindow",
+          data: windowID
         });
       }
     });
@@ -261,11 +263,13 @@ const prepareToLeaveFile = (callback = constants.noop) => {
 };
 
 const attemptToLeaveProject = (callback) => {
-  if (anyProjectFileIsModified()) {
-    callback(false);
-    return;
-  }
-  callback(true);
+  prepareToLeaveFile(() => {
+    if (anyProjectFileIsModified()) {
+      callback(false);
+      return;
+    }
+    callback(true);
+  });
 };
 
 const saveCurrentProjectFileAs = (absolutePath, callback = constants.noop) => {
