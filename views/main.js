@@ -86,6 +86,20 @@ const definedMessages = {
         saveCurrentProjectFileAs(absolutePath);
       }
     });
+  },
+  "shouldClose": () => {
+    attemptToLeaveProject((shouldLeave) => {
+      if (shouldLeave) {
+        sendMessageToMain({
+          type: "closeThisWindow",
+        });
+      }
+      else {
+        sendMessageToMain({
+          type: "promptToCloseThisWindow"
+        });
+      }
+    });
   }
 };
 

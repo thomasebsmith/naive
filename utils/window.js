@@ -50,6 +50,16 @@ exports.openWindow = (type) => {
       messageQueue[id] = null;
     }
   });
+  win.on("beforeunload", (e) => {
+    exports.sendWindowMessage(win, {
+      type: "shouldClose"
+    });
+
+    // Stop the close until main.js receives a reply from the window.
+    e.returnValue = false;
+    return false;
+  });
+
   win.on("closed", () => {
     windows[id] = null;
     messageQueue[id] = null;
