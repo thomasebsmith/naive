@@ -1,4 +1,8 @@
 window.requireProps = {};
+
+// require(filename) - Emulates the (usually) built-in require function by
+//  calling the parent window's require function in a slightly modified way
+//  so that the current window is considered to be a separate context.
 const require = (filename) => {
   const parentRequire = parent.require;
   const absolutePath = parentRequire.resolve(filename);
@@ -22,6 +26,7 @@ const require = (filename) => {
   return result;
 };
 
+// Imports
 const constants = require("../utils/constants");
 const highlight = require("../utils/highlight");
 const { htmlFromArray } = require("../utils/htmlUtilities");
