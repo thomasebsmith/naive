@@ -1,3 +1,4 @@
+// Imports
 const {ipcRenderer} = require("electron");
 
 const fs = require("fs");
@@ -13,6 +14,7 @@ const {
 const contentAction = require("../utils/contentAction");
 const { handleKeys } = require("../utils/keyhandling");
 
+// Global variables/constants
 const titleEl = document.getElementsByTagName("title")[0];
 
 let sidebarEl, sidebarButtonsEl, filesEl, contentEl;
@@ -21,11 +23,14 @@ let frameLoaded = false;
 let completelyLoaded = false;
 let windowID = null;
 
+// setTitle(title) - Sets the editor's title to be title.
 const setTitle = (title) => {
   titleEl.textContent = title;
 };
 
 const definedMessages = {
+  // loadProject() - Shows an "Open File" dialog and then loads the project
+  //  selected by the user.
   "loadProject": () => {
     sendAsyncMessageToMain({
       type: "showOpenDialog",
@@ -55,6 +60,7 @@ const definedMessages = {
       });
     });
   },
+  // id(id) - Notifies the main view that the window's ID is id.
   "id": (id) => {
     windowID = id;
     if (completelyLoaded) {
@@ -64,15 +70,22 @@ const definedMessages = {
       });
     }
   },
+  // contentAction(data) - Performs a content action (i.e. an editor action)
+  //  based on the given data.
   "contentAction": (data) => {
     contentAction(data.action, ...data.args);
   },
+  // saveCurrentProjectFile() - Saves the current project file to disk.
   "saveCurrentProjectFile": () => {
     saveCurrentProjectFile();
   },
+  // saveCurrentProjectFileAs(absolutePath) - Saves the current project file to
+  //  disk at the specified absolute location on disk.
   "saveCurrentProjectFileAs": (absolutePath) => {
     saveCurrentProjectFileAs(absolutePath);
   },
+  // saveCurrentProjectFileAsDialog() - Shows a dialog that allows the user to
+  //  select where the current project file is saved to disk.
   "saveCurrentProjectFileAsDialog": () => {
     sendAsyncMessageToMain({
       type: "showSaveDialog",
@@ -87,6 +100,9 @@ const definedMessages = {
       }
     });
   },
+  // shouldClose() - Tells the editor to close itself. The editor will check
+  //  for unsaved changes and will warn the user if there are any. Otherwise,
+  //  the editor will close itself via messaging back to /main.js.
   "shouldClose": () => {
     attemptToLeaveProject((shouldLeave) => {
       if (shouldLeave) {
@@ -105,6 +121,9 @@ const definedMessages = {
   }
 };
 
+// applyStyles(style) - Adds the given styles to the editor. Possible styles
+//  are the sidebar background, sidebar button background, and text color. Also
+//  sends style information to the editor.html page.
 const applyStyles = (style) => {
   sidebarEl.style.background = style.sidebarBackground;
   sidebarButtonsEl.style.background = style.sidebarButtonsBackground;
@@ -115,6 +134,11 @@ const applyStyles = (style) => {
 let currentProject = null;
 let fileIsLoaded = false;
 
+// updateProjectFileCache(filePath, content) - Updates the file cache for the
+//  current project with the given content for the file at filePath. The file
+//  cache is used for caching the actual, saved-to-disk content of each
+//  project file that has been opened. It is later used for comparison with
+//  edited versions of the files to determine if there are unsaved changes.
 const updateProjectFileCache = (filePath, content) => {
   if (currentProject.fileCache === undefined) {
     currentProject.fileCache = Object.create(null);
@@ -122,6 +146,11 @@ const updateProjectFileCache = (filePath, content) => {
   currentProject.fileCache[filePath] = content;
 };
 
+// updateProjectEditCache(filePath, content) - Updates the edit cache for the
+//  current project with the given content for the file at filePath. The edit
+//  cache is used for temporarily storing (usually unsaved) changes. It is
+//  used for keeping multiple unsaved files open at once and for comparison
+//  when determining if there are unsaved files.
 const updateProjectEditCache = (filePath, content) => {
   if (currentProject.editCache === undefined) {
     currentProject.editCache = Object.create(null);
@@ -129,6 +158,8 @@ const updateProjectEditCache = (filePath, content) => {
   currentProject.editCache[filePath] = content;
 };
 
+// loadFileContent(filePath[, callback]) - Loads the file at the given filePath
+//  in the editor. Caches content appropriately.
 const loadFileContent = (filePath, callback = constants.noop) => {
   const onFileLeft = () => {
     const onFileRead = (err, content) => {
@@ -165,6 +196,8 @@ const loadFileContent = (filePath, callback = constants.noop) => {
   }
 };
 
+// saveFileContent(filePath, text[, callback]) - Saves text to the file at the
+//  given filePath. Updates caches appropriately.
 const saveFileContent = (filePath, text, callback = constants.noop) => {
   fs.writeFile(filePath, text, { encoding: "utf8" }, (err) => {
     if (err) {
@@ -177,6 +210,8 @@ const saveFileContent = (filePath, text, callback = constants.noop) => {
   });
 };
 
+// loadSidebarContent(project[, callback]) - Loads the sidebar, containing the
+//  list of project files, into the DOM.
 const loadSidebarContent = (project, callback = noop) => {
   const projectPath = project.path;
   const projectName = project.name;
@@ -203,6 +238,8 @@ const loadSidebarContent = (project, callback = noop) => {
   });
 };
 
+// storeProject() - Saves the current project to localStorage. Does not save
+//  caches.
 const storeProject = () => {
   localStorage.setItem("project", JSON.stringify({
     name: currentProject.name,
@@ -211,12 +248,15 @@ const storeProject = () => {
   }));
 };
 
+// setProjectFile(relativePath) - Opens the file at relativePath within the
+//  current project.
 const setProjectFile = (relativePath) => {
   currentProject.selectedRelativePath = relativePath;
   storeProject();
   reloadFileContent();
 };
 
+// reloadFileContent(callback) - Reloads the currently selected file.
 const reloadFileContent = (callback) => {
   const selectedEl = document.querySelector(".fileName.selected");
   if (selectedEl !== null) {
@@ -240,6 +280,8 @@ const reloadFileContent = (callback) => {
   }
 };
 
+// loadProject(project[, callback]) - Loads the project within the given object
+//  representation.
 const loadProject = (project, callback = constants.noop) => {
   currentProject = project;
   storeProject();
@@ -252,6 +294,8 @@ const loadProject = (project, callback = constants.noop) => {
   }
 };
 
+// prepareToLeaveFile([callback]) - Saves the current file's content to the edit
+//  cache.
 const prepareToLeaveFile = (callback = constants.noop) => {
   contentAction("get", addReplyListener((text) => {
     updateProjectEditCache(
@@ -262,6 +306,9 @@ const prepareToLeaveFile = (callback = constants.noop) => {
   }));
 };
 
+// attemptToLeaveProject(callback) - Prepares for exiting the project. callback
+//  is called with a boolean that is true iff there are unsaved project file
+//  changes.
 const attemptToLeaveProject = (callback) => {
   prepareToLeaveFile(() => {
     if (anyProjectFileIsModified()) {
