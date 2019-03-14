@@ -319,12 +319,16 @@ const attemptToLeaveProject = (callback) => {
   });
 };
 
+// saveCurrentProjectFileAs(absolutePath[, callback) - Saves the current project
+//  file at the given absolute location.
 const saveCurrentProjectFileAs = (absolutePath, callback = constants.noop) => {
   contentAction("get", addReplyListener((text) => {
     saveFileContent(absolutePath, text, callback);
   }));
 };
 
+// saveCurrentProjectFile([callback]) - Saves the current project file at its
+//  existing location.
 const saveCurrentProjectFile = (callback = constants.noop) => {
   saveCurrentProjectFileAs(
     path.join(currentProject.path, currentProject.selectedRelativePath),
@@ -332,11 +336,15 @@ const saveCurrentProjectFile = (callback = constants.noop) => {
   );
 };
 
+// fileIsModified(absolutePath, editorText) - Checks the file cache to see if
+//  the given editorText differs from what is actually on disk.
 const fileIsModified = (absolutePath, editorText) => {
   const cacheResult = currentProject.fileCache[absolutePath];
   return cacheResult !== editorText;
 };
 
+// anyProjectFileIsModified() - Returns whether any file in the edit cache is
+//  different from the file cache (i.e. whether any file has been modified).
 const anyProjectFileIsModified = () => {
   for (let i in currentProject.editCache) {
     if (fileIsModified(i, currentProject.editCache[i])) {
@@ -346,6 +354,8 @@ const anyProjectFileIsModified = () => {
   return false;
 };
 
+// onContentLoaded() - Applies styles, loads the project, and finally sends a
+//  callback to /main.js indicating that the window has loaded.
 const onContentLoaded = () => {
   applyStyles(prefs.get("style"));
   loadProject(JSON.parse(localStorage.getItem("project")), () => {
@@ -359,6 +369,8 @@ const onContentLoaded = () => {
   });
 };
 
+// Messages are handled by calling definedMessages[msg.type](msg.data) for some
+// given message data msg.
 ipcRenderer.on("message", (event, data) => {
   if (definedMessages.hasOwnProperty(data.type)) {
     definedMessages[data.type](data.data);
@@ -368,6 +380,10 @@ ipcRenderer.on("message", (event, data) => {
   }
 });
 
+// replyListeners for messages to the window can automatically be added by
+//  using the addReplyListener(func) function which will return a replyID.
+//  Note that replyListeners is only cleared when all reply listeners have been
+//  called.
 const replyListeners = [];
 const addReplyListener = (func) => {
   return replyListeners.push(func) - 1;
@@ -384,12 +400,23 @@ window.addEventListener("message", (event) => {
     else if (typeof event.data === "object" &&
              event.data.type === constants.reply) {
       replyListeners[event.data.replyID](event.data.result);
+      replyListeners[event.data.replyID] = null;
+      for (let i = 0; i < replyListeners.length; i++) {
+        if (replyListeners[i] !== null) {
+          return;
+        }
+      }
+      replyListeners = [];
     }
   }
 });
 
+// Add triggers for backspace, enter, etc. in which messages are sent to the
+//  editor.
 handleKeys(window, contentAction);
 
+// When the DOM is loaded, obtain references to necessary HTML elements and
+//  finish loading content if the frame (editor.html) has loaded.
 document.addEventListener("DOMContentLoaded", () => {
   sidebarEl = document.getElementById("sidebar");
   sidebarButtonsEl = document.getElementById("sidebar-buttons");
