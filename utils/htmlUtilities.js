@@ -1,3 +1,10 @@
+// utils/htmlUtilities.js
+//
+// This file contains a utility for creating HTML from an array. If parentEl
+//  is supplied, this HTML is created within parentEl and parentEl is returned.
+//  Otherwise, a new HTML element is created to contain the result, which is
+//  then returned.
+
 exports.htmlFromArray = (array, parentEl = null) => {
   let el;
   const results = [];
