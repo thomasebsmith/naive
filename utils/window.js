@@ -1,15 +1,27 @@
-const { BrowserWindow, ipcMain } = require("electron");
+// utils/window.js
+//
+// This file contains a class for handling the windows in an application.
 
+// Imports
+const { BrowserWindow, ipcMain } = require("electron");
 const isProduction = require("./isProduction");
 const constants = require("./constants");
+
 if (!isProduction) {
   console.log("Starting " + constants.appName);
 }
 
+// All open windows are stored in the windows array. Messages that have not
+//  yet been sent to windows (because the windows have not loaded) are
+//  stored in messageQueue.
 const windows = [];
 const messageQueue = [];
+
 let focusedWindow = null;
 
+// When a valid window-loaded message is received from the renderer process,
+//  show the corresponding window. The window is hidden beforehand to prevent
+//  users from seeing the window while it is loading.
 ipcMain.on("message", (event, data) => {
   if (data.type === "window-loaded") {
     if (windows[data.data]) {
@@ -21,6 +33,7 @@ ipcMain.on("message", (event, data) => {
   }
 });
 
+// An object containing preferences for the default types of windows.
 exports.Windows = {
   "main": {
     minWidth: 400,
@@ -31,6 +44,9 @@ exports.Windows = {
   }
 };
 
+// openWindow(type) - Attempts to open a window based on the information in
+//  type. The properties in type correspond to those in exports.Windows
+//  objects.
 exports.openWindow = (type) => {
   let win = new BrowserWindow({
     width: type.width,
@@ -69,12 +85,17 @@ exports.openWindow = (type) => {
   });
 };
 
+// getWindow(id) - Returns the window with the given id.
 exports.getWindow = (id) => windows[id];
 
+// getWindows() - Returns all open windows.
 exports.getWindows = () => windows.filter(win => win !== null);
 
+// getFocusedWindow() - Returns the focused window.
 exports.getFocusedWindow = () => BrowserWindow.getFocusedWindow();
 
+// sendWindowMessage(win, msg) - Sends the message msg to the window win with
+//  type "message".
 exports.sendWindowMessage = (win, msg) => {
   const id = windows.indexOf(win);
   if (id === -1 || win === null) {
@@ -88,10 +109,16 @@ exports.sendWindowMessage = (win, msg) => {
   }
 };
 
+// forceDestroyWindow(id) - Forcibly closes the window with id "id". This should
+//  only be used once it is confirmed that the user does not have any unsaved
+//  changes that they wish to keep.
 exports.forceDestroyWindow = (id) => {
   windows[id].destroy();
 };
 
+// forceShowWindows() - Forces all windows to appear, even if they have not
+//  loaded. This is useful for debugging purposes (a corresponding menu item
+//  shows up in debug runs).
 exports.forceShowWindows = () => {
   for (let win of windows) {
     win.show();
