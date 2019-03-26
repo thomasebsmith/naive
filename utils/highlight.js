@@ -1,9 +1,16 @@
+// utils/highlight.js
+//
+// This file provides utilities for generating syntax-highlighted HTML based
+//  on a mime type and some text.
+
+// Imports
 const fs = require("fs");
 const path = require("path");
 const { htmlFromArray } = require("../utils/htmlUtilities");
 
 const highlighterDirectory = "../highlighters/";
 
+// Mime types
 const highlighters = {
   "application/javascript": "javascript",
   "text/plain": "text"
@@ -15,6 +22,10 @@ const defaultTokenType = {
   className: "plain"
 };
 
+// formatHighlighter(highlighter) - Converts the string properties of
+//  highlighter into regular expressions if necessary.
+// Note: Don't use the __formatted__ property in your highlighters, as it
+//  will be overwritten.
 const formatHighlighter = (highlighter) => {
   if (highlighter.__formatted__ !== highlighterFormattedKey) {
     for (let t of highlighter.tokenTypes) {
@@ -32,6 +43,10 @@ const formatHighlighter = (highlighter) => {
   }
 };
 
+// rehighlightHTML(highlighter, code, element, index) - Rehighlights some
+//  already-highlighted HTML using highlighter. The code is given by code, and
+//  the root element is given by element. The index of the modified element
+//  in the root element's child list is given by index.
 const rehighlightHTML = (highlighter, code, element, index) => {
   let i = index;
   const elementList = element.children;
@@ -66,6 +81,9 @@ const rehighlightHTML = (highlighter, code, element, index) => {
   }
 };
 
+// generateHighlightedToken(highlighter, code, startIndex = 0) - This generator
+//  yields the next token as produced by highlighter with the code as given
+//  in code. It starts at string index startIndex within code.
 function* generateHighlightedToken(highlighter, code, startIndex = 0) {
   if (code.length - startIndex === 0) {
     return [];
@@ -148,6 +166,7 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
   });
 }
 
+// defaultToken(text) - Produces a default token containing the text in text.
 const defaultToken = (text) => {
   return {
     className: "plain",
@@ -159,9 +178,11 @@ const defaultToken = (text) => {
   };
 };
 
+// highlightWith(highlighter, code) - Returns an array containing the token
+//  objects resulting from highlighting code with highlighter.
 const highlightWith = (highlighter, code) => {
   if (!code) {
-    return defaultToken(code);
+    return [defaultToken(code)];
   }
   const generator = generateHighlightedToken(highlighter, code);
   const result = [];
@@ -171,6 +192,9 @@ const highlightWith = (highlighter, code) => {
   return result;
 };
 
+// highlight(code, language, element = null, index = null) - Produces
+//  highlighted HTML for code written in language, starting with index
+//  and being inserted into element if element is supplied.
 const highlight = (code, language, element = null, index = null) => {
   try {
     if (highlighters.hasOwnProperty(language)) {
