@@ -1,7 +1,16 @@
+// utils/menus.js
+//
+// Provides the application menus. Clients of this file only need to supply
+//  a contentAction function that actually performs the actions.
+
+// Imports
 const {Menu} = require("electron");
 const constants = require("./constants");
 const isProduction = require("./isProduction");
 
+// setMenus(sendAction) - Sets the application's menus to include all the
+//  appropriate actions with appropriate keyboard shortcuts. When an action is
+//  taken, the sendAction function is called.
 const setMenus = (sendAction) => {
   const template = [
     {
@@ -39,6 +48,8 @@ const setMenus = (sendAction) => {
       ]
     }
   ];
+  // On MacOS, a menu with the app name and basic MacOS app actions is
+  //  available.
   if (process.platform === 'darwin') {
     template.unshift({
       label: constants.appName,
@@ -55,6 +66,7 @@ const setMenus = (sendAction) => {
       ]
     });
   }
+  // A "Developer" menu is available if not in production.
   if (!isProduction) {
     template.push({
       label: "Developer",
