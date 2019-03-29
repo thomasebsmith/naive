@@ -1,3 +1,9 @@
+// views/main.js
+//
+// This file provides the JavaScript message handling and interaction logic for
+//  the UI around the editor. It also sends messages to /main.js and
+//  views/editor.js as necessary.
+
 // Imports
 const {ipcRenderer} = require("electron");
 
@@ -32,18 +38,25 @@ const definedMessages = {
   // loadProject() - Shows an "Open File" dialog and then loads the project
   //  selected by the user.
   "loadProject": () => {
+    // First, show the open dialog (which is triggered by sending a message to
+    //  main).
     sendAsyncMessageToMain({
       type: "showOpenDialog",
       data: {
         properties: ["openDirectory", "openFile", "createDirectory"]
       }
     }, (projectPath) => {
+      // Once a project path is selected in the dialog, use it to load the
+      //  project.
       projectPath = projectPath[0];
+      // Check that the project location exists.
       fs.stat(projectPath, (err, stats) => {
         if (err) {
           console.error("There was an error loading the project with path ", projectPath, ": ", err);
         }
         else if (stats.isDirectory()){
+          // If the selected path is a directory, open the project in that
+          //  directory.
           loadProject({
             name: path.basename(projectPath),
             path: projectPath,
@@ -51,6 +64,8 @@ const definedMessages = {
           });
         }
         else {
+          // If the selected path is not a directory, open the project in the
+          //  path's parent directory.
           loadProject({
             name: path.basename(path.dirname(projectPath)),
             path: path.dirname(projectPath),
