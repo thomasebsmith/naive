@@ -1,3 +1,9 @@
+// main.js
+//
+// This file provides the background process for the app. It manages the
+//  open windows, shows prompts, shows menus, and quits the app when requested.
+
+// Imports
 const {app, BrowserWindow, dialog, ipcMain} = require("electron");
 const {
   Windows,
@@ -12,6 +18,9 @@ const {
 const setMenus = require("./utils/menus");
 const prefs = new (require("./utils/prefs"))();
 
+// definedMessages contains messages that can be triggered from the renderer
+//  process or other parts of the background process to manage windows,
+//  or preferences.
 const definedMessages = {
   "openWindow": () => {
     openWindow(Windows.main);
@@ -45,6 +54,8 @@ const definedMessages = {
   }
 };
 
+// asyncMessages contains messages that can be called from other processes and
+//  which need a callback.
 const asyncMessages = {
   "showOpenDialog": (args, callback) => {
     dialog.showOpenDialog(args, callback);
@@ -54,6 +65,8 @@ const asyncMessages = {
   }
 };
 
+// evaluateMessage(msg) - Runs the (non-async) message corresponding to
+//  msg.type with an argument of msg.data.
 const evaluateMessage = (msg) => {
   if (definedMessages.hasOwnProperty(msg.type)) {
     definedMessages[msg.type](msg.data);
@@ -69,6 +82,8 @@ const evaluateMessage = (msg) => {
   }
 };
 
+// When an asynchronous message is sent from the renderer process, call the
+//  appropriate message.
 ipcMain.on("asynchronous-message", (event, data) => {
   if (asyncMessages.hasOwnProperty(data.msg.type)) {
     asyncMessages[data.msg.type](data.msg.data, (msg) => {
@@ -87,17 +102,20 @@ ipcMain.on("message", (event, data) => {
   evaluateMessage(data);
 });
 
+// When the app opens, open the default "main" window and set up the menus.
 app.on("ready", () => {
   openWindow(Windows.main);
   setMenus(evaluateMessage);
 });
 
+// When all windows are closed, quit the app (unless on MacOS).
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
+// When the app icon is clicked, open a window if there is not already one open.
 app.on("activate", () => {
   if (getWindows().length === 0) {
     openWindow(Windows.main);
