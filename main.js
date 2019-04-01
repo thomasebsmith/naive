@@ -1,7 +1,6 @@
 // main.js
 //
-// This file provides the background process for the app. It manages the
-//  open windows, shows prompts, shows menus, and quits the app when requested.
+// This file provides the background process for the app. It manages the //  open windows, shows prompts, shows menus, and quits the app when requested.
 
 // Imports
 const {app, BrowserWindow, dialog, ipcMain} = require("electron");
@@ -17,6 +16,8 @@ const {
 } = require("./utils/window");
 const setMenus = require("./utils/menus");
 const prefs = new (require("./utils/prefs"))();
+
+let attemptingToQuit = false;
 
 // definedMessages contains messages that can be triggered from the renderer
 //  process or other parts of the background process to manage windows,
@@ -49,6 +50,9 @@ const definedMessages = {
       const DONT_SAVE = 1;
       if (response === DONT_SAVE) {
         forceDestroyWindow(windowID);
+      }
+      else {
+        attemptingToQuit = false;
       }
     });
   }
@@ -110,9 +114,13 @@ app.on("ready", () => {
 
 // When all windows are closed, quit the app (unless on MacOS).
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
+  if (process.platform !== "darwin" || attemptingToQuit) {
     app.quit();
   }
+});
+
+app.on("before-quit", () => {
+  attemptingToQuit = true;
 });
 
 // When the app icon is clicked, open a window if there is not already one open.
