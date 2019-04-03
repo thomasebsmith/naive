@@ -61,14 +61,17 @@ const rehighlightHTML = (highlighter, code, element, index) => {
            highlighted.data.startIndex > +elementList[i].dataset.startIndex) {
       i++;
     } 
-    if (+elementList[i].dataset.startIndex === highlighted.data.startIndex &&
+    if (i < elementList.length &&
+      +elementList[i].dataset.startIndex === highlighted.data.startIndex &&
       elementList[i].dataset.tokenTypeName === highlighted.data.tokenTypeName) {
       break;
     }
     newTokens.push(highlighted);
-    if (i >= elementList.length) {
-      break;
-    }
+  }
+  if (done) {
+    // If we ran out of tokens before iterating through all the old elements, we
+    //  need to replace *all* of the elements.
+    i = elementList.length;
   }
   // Now, replace the HTML elements that are no longer up-to-date
   for (let j = i - 1; j >= index; j--) {
