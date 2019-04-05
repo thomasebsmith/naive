@@ -63,7 +63,8 @@ const rehighlightHTML = (highlighter, code, element, index) => {
     } 
     if (i < elementList.length &&
       +elementList[i].dataset.startIndex === highlighted.data.startIndex &&
-      elementList[i].dataset.tokenTypeName === highlighted.data.tokenTypeName) {
+      elementList[i].dataset.tokenTypeName === highlighted.data.tokenTypeName &&
+      elementList[i].textContent === highlighted.text) {
       break;
     }
     newTokens.push(highlighted);
@@ -135,14 +136,14 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
       }
     }
     else if (tokenType.hasOwnProperty("breakOn")) {
-      tokenType.breakOn.lastIndex = startIndex;
+      tokenType.breakOn.lastIndex = i;
       if (tokenType.breakOn.test(code)) {
         i--;
         broken = true;
       }
     }
     else if (tokenType.hasOwnProperty("breakAfter")) {
-      tokenType.breakAfter.lastIndex = startIndex;
+      tokenType.breakAfter.lastIndex = tokenStartIndex;
       if (tokenType.breakAfter.test(code)) {
         broken = true;
         while (i < tokenType.breakAfter.lastIndex) {
