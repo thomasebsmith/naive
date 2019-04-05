@@ -135,14 +135,14 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
       }
     }
     else if (tokenType.hasOwnProperty("breakOn")) {
-      tokenType.breakOn.lastIndex = i;
+      tokenType.breakOn.lastIndex = startIndex;
       if (tokenType.breakOn.test(code)) {
         i--;
         broken = true;
       }
     }
     else if (tokenType.hasOwnProperty("breakAfter")) {
-      tokenType.breakAfter.lastIndex = i;
+      tokenType.breakAfter.lastIndex = startIndex;
       if (tokenType.breakAfter.test(code)) {
         broken = true;
         while (i < tokenType.breakAfter.lastIndex) {
