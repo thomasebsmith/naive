@@ -9,6 +9,10 @@
       "regex": "[0-9]"
     },
     {
+      "name": "keyword",
+      "regex": "(await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|function|if|implements|import|in|instanceof|interface|new|let|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|var|void|while|with|yield)[^a-zA-Z0-9_$]"
+    },
+    {
       "name": "identifier",
       "regex": "[a-zA-Z_$]"
     },
@@ -19,6 +23,14 @@
     {
       "name": "single-line-comment",
       "regex": "//"
+    },
+    {
+      "name": "multi-line-comment",
+      "regex": "/\\*"
+    },
+    {
+      "name": "operator",
+      "regex": "[\\[\\](){}+-~!/*%<>=&|^?:,;]"
     }
   ],
   "tokens": {
@@ -29,6 +41,10 @@
     "number": {
       "breakAfter": "(0[box])?((\\.[0-9]+)|([0-9]+(\\.[0-9]*)?))",
       "className": "number"
+    },
+    "keyword": {
+      "breakOn": "[^a-zA-Z_$]",
+      "className": "keyword"
     },
     "identifier": {
       "breakOn": "[^a-zA-Z_$0-9]",
@@ -41,6 +57,14 @@
     "single-line-comment": {
       "breakAfter": "\\n",
       "className": "comment"
+    },
+    "multi-line-comment": {
+      "breakAfter": "\\*/",
+      "className": "comment"
+    },
+    "operator": {
+      "breakOn": "[\\s\\S]",
+      "className": "operator"
     }
   }
 }

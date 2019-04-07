@@ -134,6 +134,17 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
         tokenTypeName = "__default__";
         tokenType = defaultTokenType;
       }
+      if (tokenType.hasOwnProperty("breakAfter")) {
+        tokenType.breakAfter.lastIndex = i;
+        if (tokenType.breakAfter.test(code)) {
+          broken = true;
+          while (i < tokenType.breakAfter.lastIndex) {
+            token += code.charAt(i);
+            i++;
+          }
+          i--;
+        }
+      }
     }
     else if (tokenType.hasOwnProperty("breakOn")) {
       tokenType.breakOn.lastIndex = i;
@@ -143,7 +154,7 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
       }
     }
     else if (tokenType.hasOwnProperty("breakAfter")) {
-      tokenType.breakAfter.lastIndex = tokenStartIndex;
+      tokenType.breakAfter.lastIndex = i;
       if (tokenType.breakAfter.test(code)) {
         broken = true;
         while (i < tokenType.breakAfter.lastIndex) {

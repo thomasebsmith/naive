@@ -82,7 +82,7 @@ const defaultPrefs = {
         weight: "bold"
       },
       operator: {
-        color: "#EEEEEE"
+        color: "#AAAAAA"
       },
       number: {
         color: "#44FF88"
