@@ -57,15 +57,19 @@ const remove = (elementIndex) => {
 };
 
 const getElementIndex = (position) => {
+  if (position < 0) {
+    // Assume that all "out-of-bounds" positions before the start of the code
+    // fall in the first element.
+    return 0;
+  }
   let i;
   for (i = 0; i < contentEl.children.length; i++) {
     let nextPosition = +contentEl.children[i].dataset.startIndex;
     if (nextPosition > position) {
-      break;
+      return i - 1;
     }
   }
-  i--;
-  return i;
+  return i - 1;
 };
 
 const getRelativePosition = (element, position) => {
@@ -125,7 +129,7 @@ const actions = {
       actions.set(text);
     }
     else {
-      const elementIndex = getElementIndex(position);
+      const elementIndex = getElementIndex(position - 1);
       const element = contentEl.children[elementIndex];
       const elementPosition = +element.dataset.startIndex;
       let elementContent = element.textContent;

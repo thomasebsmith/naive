@@ -15,6 +15,10 @@
     {
       "name": "string",
       "regex": "[\"']"
+    },
+    {
+      "name": "single-line-comment",
+      "regex": "//"
     }
   ],
   "tokens": {
@@ -33,6 +37,10 @@
     "string": {
       "breakAfter": "([\"'])([^\\\\]|(\\\\.))*?\\1",
       "className": "string"
+    },
+    "single-line-comment": {
+      "breakAfter": "\\n",
+      "className": "comment"
     }
   }
 }
