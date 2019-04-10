@@ -10,23 +10,19 @@
     },
     {
       "name": "type",
-      "regex": "(bool|char|char16_t|char32_t|char8_t|double|float|int|long|short|signed|unsigned|void|wchar_t)[^a-zA-Z0-9_$]"
+      "regex": "(bool|char|char16_t|char32_t|char8_t|double|float|int|long|short|signed|unsigned|void|wchar_t)[^a-zA-Z0-9_]"
     },
     {
       "name": "keyword",
-      "regex": "(alignas|alignof|and|and_eq|asm|atomic_cancel|atomic_commit|atomic_noexcept|auto|bitand|bitor|bool|break|case|catch|char|char8_t|char16_t|char32_t|class|compl|concept|const|consteval|constexpr|const_cast|continue|co_await|co_return|co_yield|decltype|default|||delete|do|double|dynamic_cast|else|enum|explicit|export|extern|false|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|not|not_eq|nullptr|operator|or|or_eq|private|protected|public|reflexpr|||register|reinterpret_cast|requires|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|synchronized|template|this|thread_local|throw|true|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while|xor|xor_eq)[^a-zA-Z0-9_$]"
-    },
-    {
-      "name": "word-operator",
-      "regex": "(alignof|const_cast|delete|dynamic_cast|new|noexcept|reinterpret_cast|sizeof|static_cast|typeid)[^a-zA-Z0-9_$]"
+      "regex": "(alignas|alignof|and|and_eq|asm|atomic_cancel|atomic_commit|atomic_noexcept|auto|bitand|bitor|bool|break|case|catch|char|char8_t|char16_t|char32_t|class|compl|concept|const|consteval|constexpr|const_cast|continue|co_await|co_return|co_yield|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|false|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|not|not_eq|nullptr|operator|or|or_eq|private|protected|public|reflexpr|register|reinterpret_cast|requires|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|synchronized|template|this|thread_local|throw|true|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while|xor|xor_eq)[^a-zA-Z0-9_]"
     },
     {
       "name": "literal-name",
-      "regex": "(NULL|nullptr|true|false)[^a-zA-Z0-9_$]"
+      "regex": "(nullptr|true|false)[^a-zA-Z0-9_]"
     },
     {
       "name": "identifier",
-      "regex": "[a-zA-Z_$]"
+      "regex": "[a-zA-Z_]"
     },
     {
       "name": "string-or-char",
@@ -37,12 +33,16 @@
       "regex": "//"
     },
     {
+      "name": "preprocessor-directive",
+      "regex": "#"
+    },
+    {
       "name": "multi-line-comment",
       "regex": "/\\*"
     },
     {
       "name": "operator",
-      "regex": "[\\[\\]\\(\\)\\{\\}=+-*/%&|^<>~!\\.?:;]"
+      "regex": "[\\[\\](){}=+\\-*/%&|\\^<>~!\\.?:;]"
     }
   ],
   "tokens": {
@@ -51,27 +51,23 @@
       "className": "plain"
     },
     "number": {
-      "breakAfter": "(0[boxBOX])?((\\.[0-9]+)|([0-9]+(\\.[0-9]*)?))([uU][lL]|[uU]|[lL]|[uU][lL][lL]|[uU][lL]|[lL][lL]|[lL][uU]|[lL][lL][uU]|[fFlL])?",
+      "breakAfter": "(0[boxBOX])?((\\.[0-9]+)|([0-9]+(\\.[0-9]*)?))([uU][lL][lL]|[lL][lL][uU]|[uU][lL]|[lL][uU]|[lL][lL]|[uU]|[lL]|[fFlL])?",
       "className": "number"
     },
     "type": {
-      "breakOn": "[^a-zA-Z_$]",
+      "breakOn": "[^a-zA-Z_]",
       "className": "keyword"
     },
     "keyword": {
-      "breakOn": "[^a-zA-Z_$]",
+      "breakOn": "[^a-zA-Z_]",
       "className": "keyword"
     },
-    "word-operator": {
-      "breakOn": "[^a-zA-Z_$]",
-      "className": "operator"
-    },
     "literal-name": {
-      "breakOn": "[^a-zA-Z_$]",
+      "breakOn": "[^a-zA-Z_]",
       "className": "builtInValue"
     },
     "identifier": {
-      "breakOn": "[^a-zA-Z_$0-9]",
+      "breakOn": "[^a-zA-Z_0-9]",
       "className": "identifier"
     },
     "string-or-char": {
@@ -81,6 +77,10 @@
     "single-line-comment": {
       "breakAfter": "\\n",
       "className": "comment"
+    },
+    "preprocessor-directive": {
+      "breakAfter": "\\n",
+      "className": "docComment"
     },
     "multi-line-comment": {
       "breakAfter": "\\*/",

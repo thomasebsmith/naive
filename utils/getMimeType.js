@@ -6,10 +6,14 @@
 const defaultMimeType = "text/plain";
 
 const mimeTypes = {
+  "c": "text/x-c-source",
+  "cpp": "text/x-cplusplus-source",
   "css": "text/css",
-  "js": "application/javascript",
+  "h": "text/x-c-source",
+  "hpp": "text/x-cplusplus-source",
   "htm": "text/html",
   "html": "text/html",
+  "js": "application/javascript",
   "txt": "text/plain"
 };
 

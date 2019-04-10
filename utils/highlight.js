@@ -13,7 +13,8 @@ const highlighterDirectory = "../highlighters/";
 // Mime types
 const highlighters = {
   "application/javascript": "javascript",
-  "text/plain": "text"
+  "text/plain": "text",
+  "text/x-cplusplus-source": "cpp"
 };
 
 const highlighterFormattedKey = {};
