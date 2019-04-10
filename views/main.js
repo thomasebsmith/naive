@@ -399,7 +399,7 @@ ipcRenderer.on("message", (event, data) => {
 //  using the addReplyListener(func) function which will return a replyID.
 //  Note that replyListeners is only cleared when all reply listeners have been
 //  called.
-const replyListeners = [];
+let replyListeners = [];
 const addReplyListener = (func) => {
   return replyListeners.push(func) - 1;
 };
