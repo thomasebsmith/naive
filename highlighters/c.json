@@ -1,0 +1,86 @@
+{
+  "tokenTypes": [
+    {
+      "name": "whitespace",
+      "regex": "\\s"
+    },
+    {
+      "name": "number",
+      "regex": "[0-9]"
+    },
+    {
+      "name": "keyword",
+      "regex": "(_Alignas|_Alignof|_Atomic|_Bool|_Complex|_Generic|_Imaginary|_Noreturn|_Static_assert|_Thread_local|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|inline|int|long|register|restrict|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)[^a-zA-Z0-9_]"
+    },
+    {
+      "name": "literal-name",
+      "regex": "(NULL|true|false)[^a-zA-Z0-9_]"
+    },
+    {
+      "name": "identifier",
+      "regex": "[a-zA-Z_]"
+    },
+    {
+      "name": "string-or-char",
+      "regex": "[\"']"
+    },
+    {
+      "name": "single-line-comment",
+      "regex": "//"
+    },
+    {
+      "name": "preprocessor-directive",
+      "regex": "#"
+    },
+    {
+      "name": "multi-line-comment",
+      "regex": "/\\*"
+    },
+    {
+      "name": "operator",
+      "regex": "[\\[\\](){}=+\\-*/%&|\\^<>~!\\.?:;]"
+    }
+  ],
+  "tokens": {
+    "whitespace": {
+      "breakOn": "\\S",
+      "className": "plain"
+    },
+    "number": {
+      "breakAfter": "(0[xX])?((\\.[0-9]+)|([0-9]+(\\.[0-9]*)?))([uU][lL][lL]|[lL][lL][uU]|[uU][lL]|[lL][uU]|[lL][lL]|[uU]|[lL]|[fFlL])?",
+      "className": "number"
+    },
+    "keyword": {
+      "breakOn": "[^a-zA-Z_]",
+      "className": "keyword"
+    },
+    "literal-name": {
+      "breakOn": "[^a-zA-Z_]",
+      "className": "builtInValue"
+    },
+    "identifier": {
+      "breakOn": "[^a-zA-Z_0-9]",
+      "className": "identifier"
+    },
+    "string-or-char": {
+      "breakAfter": "([\"'])([^\\\\]|(\\\\.))*?\\1",
+      "className": "string"
+    },
+    "single-line-comment": {
+      "breakAfter": "\\n",
+      "className": "comment"
+    },
+    "preprocessor-directive": {
+      "breakAfter": "\\n",
+      "className": "docComment"
+    },
+    "multi-line-comment": {
+      "breakAfter": "\\*/",
+      "className": "comment"
+    },
+    "operator": {
+      "breakOn": "[\\s\\S]",
+      "className": "operator"
+    }
+  }
+}

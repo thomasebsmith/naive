@@ -14,6 +14,7 @@ const highlighterDirectory = "../highlighters/";
 const highlighters = {
   "application/javascript": "javascript",
   "text/plain": "text",
+  "text/x-c-source": "c",
   "text/x-cplusplus-source": "cpp"
 };
 
