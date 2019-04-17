@@ -386,7 +386,7 @@ const onContentLoaded = () => {
 
 // Messages are handled by calling definedMessages[msg.type](msg.data) for some
 // given message data msg.
-ipcRenderer.on("message", (event, data) => {
+ipcRenderer.on(constants.message, (event, data) => {
   if (definedMessages.hasOwnProperty(data.type)) {
     definedMessages[data.type](data.data);
   }

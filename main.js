@@ -14,6 +14,7 @@ const {
   forceShowWindows,
   forceDestroyWindow
 } = require("./utils/window");
+const constants = require("./utils/constants");
 const setMenus = require("./utils/menus");
 const prefs = new (require("./utils/prefs"))();
 
@@ -88,7 +89,7 @@ const evaluateMessage = (msg) => {
 
 // When an asynchronous message is sent from the renderer process, call the
 //  appropriate message.
-ipcMain.on("asynchronous-message", (event, data) => {
+ipcMain.on(constants.asyncMessage, (event, data) => {
   if (asyncMessages.hasOwnProperty(data.msg.type)) {
     asyncMessages[data.msg.type](data.msg.data, (msg) => {
       event.sender.send("reply", {
@@ -102,7 +103,7 @@ ipcMain.on("asynchronous-message", (event, data) => {
   }
 });
 
-ipcMain.on("message", (event, data) => {
+ipcMain.on(constants.message, (event, data) => {
   evaluateMessage(data);
 });
 

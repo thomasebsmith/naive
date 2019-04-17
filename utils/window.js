@@ -22,7 +22,7 @@ let focusedWindow = null;
 // When a valid window-loaded message is received from the renderer process,
 //  show the corresponding window. The window is hidden beforehand to prevent
 //  users from seeing the window while it is loading.
-ipcMain.on("message", (event, data) => {
+ipcMain.on(constants.message, (event, data) => {
   if (data.type === "window-loaded") {
     if (windows[data.data]) {
       windows[data.data].show();
@@ -61,7 +61,7 @@ exports.openWindow = (type) => {
   win.webContents.on("did-finish-load", () => {
     if (messageQueue[id] !== null) {
       for (let msg of messageQueue[id]) {
-        win.webContents.send("message", msg);
+        win.webContents.send(constants.message, msg);
       }
       messageQueue[id] = null;
     }
@@ -102,7 +102,7 @@ exports.sendWindowMessage = (win, msg) => {
     throw new Error("Invalid window passed to sendMessage");
   }
   if (messageQueue[id] === null) {
-    win.webContents.send("message", msg);
+    win.webContents.send(constants.message, msg);
   }
   else {
     messageQueue[id].push(msg);

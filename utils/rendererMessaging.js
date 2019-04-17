@@ -5,11 +5,12 @@
 
 // Imports
 const {ipcRenderer} = require("electron");
+const constants = require("./constants");
 let messageID = 0;
 
 // sendMessageToMain(msg) - Sends msg to /main.js.
 exports.sendMessageToMain = (msg) => {
-  ipcRenderer.send("message", msg);
+  ipcRenderer.send(constants.message, msg);
 };
 
 // sendAsyncMessageToMain(msg, callback) - Sends msg to /main.js, waiting
@@ -17,7 +18,7 @@ exports.sendMessageToMain = (msg) => {
 //  with the replying msg from /main.js.
 exports.sendAsyncMessageToMain = (msg, callback) => {
   const replyID = messageID;
-  ipcRenderer.send("async-message", {
+  ipcRenderer.send(constants.asyncMessage, {
     id: messageID,
     msg: msg
   });
@@ -25,9 +26,9 @@ exports.sendAsyncMessageToMain = (msg, callback) => {
   const listener = (event, data) => {
     if (data.id === replyID) {
       callback(data.msg);
-      ipcRenderer.removeListener("reply", listener);
+      ipcRenderer.removeListener(constants.reply, listener);
     }
   };
 
-  ipcRenderer.on("reply", listener);
+  ipcRenderer.on(constants.reply, listener);
 };

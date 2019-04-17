@@ -6,7 +6,9 @@
 // should receive a reply, and a noop function.
 module.exports = {
   appName: "Naive",
+  asyncMessage: "asyncMessage",
   contentLoaded: "contentLoaded",
+  message: "message",
   reply: "reply",
   noop: () => {}
 };
