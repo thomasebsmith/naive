@@ -5,7 +5,7 @@
 //  views/editor.js as necessary.
 
 // Imports
-const {ipcRenderer} = require("electron");
+const { ipcRenderer, remote } = require("electron");
 
 const fs = require("fs");
 const path = require("path");
@@ -144,6 +144,16 @@ const applyStyles = (style) => {
   sidebarButtonsEl.style.background = style.sidebarButtonsBackground;
   contentAction("setStyle", style.content);
   document.body.style.color = style.textColor;
+};
+
+// getDefaultProject() - Returns the default project, which involves the
+//  the built-in Naive intro files.
+const getDefaultProject = () => {
+  return {
+    name: "Welcome to Naive",
+    path: path.join(remote.app.getAppPath(), "welcome"),
+    selectedRelativePath: "index.md"
+  };
 };
 
 let currentProject = null;
@@ -299,6 +309,9 @@ const reloadFileContent = (callback) => {
 //  representation.
 const loadProject = (project, callback = constants.noop) => {
   currentProject = project;
+  if (currentProject === null) {
+    currentProject = project = getDefaultProject();
+  }
   storeProject();
   if (currentProject === null) {
     contentAction("set", "No project exists");
