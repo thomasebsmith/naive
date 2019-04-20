@@ -14,6 +14,7 @@ const mimeTypes = {
   "htm": "text/html",
   "html": "text/html",
   "js": "application/javascript",
+  "md": "text/markdown",
   "txt": "text/plain"
 };
 

@@ -1,0 +1,14 @@
+{
+  "tokenTypes": [ 
+    {
+      "name": "heading",
+      "regex": "^#"
+    }
+  ],
+  "tokens": {
+    "heading": {
+      "breakOn": "\\n",
+      "className": "docComment"
+    }
+  }
+}
