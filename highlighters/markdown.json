@@ -2,11 +2,19 @@
   "tokenTypes": [ 
     {
       "name": "heading",
-      "regex": "^#"
+      "regex": "(^|\\n)#"
     },
     {
       "name": "link",
       "regex": "\\[.*?\\]\\(.*?\\)"
+    },
+    {
+      "name": "codeBlock",
+      "regex": "```"
+    },
+    {
+      "name": "codeInline",
+      "regex": "`"
     }
   ],
   "tokens": {
@@ -17,6 +25,14 @@
     "link": {
       "breakAfter": "\\[.*?\\]\\(.*?\\)",
       "className": "string"
+    },
+    "codeBlock": {
+      "breakAfter": "[^`]```",
+      "className": "number"
+    },
+    "codeInline": {
+      "breakAfter": "[^`]`",
+      "className": "number"
     }
   }
 }
