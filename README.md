@@ -11,8 +11,9 @@ languages, autocomplete, addons, keyboard shortcuts, and more. A Vim emulation
 mode will also be added.
 
 #### Issues
-Naive's syntax highlighting is not yet implemented in most languages.
-Naive's open dialog does not always appear.
+- Naive's syntax highlighting is not yet implemented in most languages.
+- Naive's open dialog does not always appear.
+- Syntax highlighting does not work when inserting links in Markdown
 
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, and JavaScript.

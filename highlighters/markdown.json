@@ -3,12 +3,20 @@
     {
       "name": "heading",
       "regex": "^#"
+    },
+    {
+      "name": "link",
+      "regex": "\\[.*?\\]\\(.*?\\)"
     }
   ],
   "tokens": {
     "heading": {
       "breakOn": "\\n",
       "className": "docComment"
+    },
+    "link": {
+      "breakAfter": "\\[.*?\\]\\(.*?\\)",
+      "className": "string"
     }
   }
 }
