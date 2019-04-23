@@ -15,6 +15,18 @@
     {
       "name": "codeInline",
       "regex": "`"
+    },
+    {
+      "name": "listBullet",
+      "regex": "(^|\\n)\\s*?-"
+    },
+    {
+      "name": "bold",
+      "regex": "\\*\\*.+?\\*\\*"
+    },
+    {
+      "name": "italic",
+      "regex": "(\\*|_).+?\\1"
     }
   ],
   "tokens": {
@@ -33,6 +45,18 @@
     "codeInline": {
       "breakAfter": "[^`]`",
       "className": "number"
+    },
+    "listBullet": {
+      "breakAfter": "-",
+      "className": "operator"
+    },
+    "bold": {
+      "breakAfter": "\\*\\*.+?\\*\\*",
+      "className": "keyword"
+    },
+    "italic": {
+      "breakAfter": "(\\*|_).+?\\1",
+      "className": "identifier"
     }
   }
 }
