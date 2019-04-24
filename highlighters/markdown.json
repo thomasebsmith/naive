@@ -5,6 +5,10 @@
       "regex": "(^|\\n)#"
     },
     {
+      "name": "underlinedHeading",
+      "regex": "(^|\\n).+?\\n(=|-)\\2*?\n"
+    },
+    {
       "name": "link",
       "regex": "\\[.*?\\]\\(.*?\\)"
     },
@@ -18,7 +22,7 @@
     },
     {
       "name": "listBullet",
-      "regex": "(^|\\n)\\s*?-"
+      "regex": "(^|\\n)\\s*?-\\s"
     },
     {
       "name": "bold",
@@ -32,6 +36,10 @@
   "tokens": {
     "heading": {
       "breakOn": "\\n",
+      "className": "docComment"
+    },
+    "underlinedHeading": {
+      "breakAfter": "(^|\\n).+?\\n(=|-)\\2*?\\n",
       "className": "docComment"
     },
     "link": {
@@ -48,7 +56,7 @@
     },
     "listBullet": {
       "breakAfter": "-",
-      "className": "operator"
+      "className": "docComment"
     },
     "bold": {
       "breakAfter": "\\*\\*.+?\\*\\*",
