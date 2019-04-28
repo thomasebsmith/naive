@@ -12,7 +12,7 @@ const highlighterDirectory = "../highlighters/";
 
 // Mime types
 const highlighters = {
-  "application/javascript": "javascript",
+  "application/javascript": "javascript", "text/html": "html",
   "text/markdown": "markdown",
   "text/plain": "text",
   "text/x-c-source": "c",
@@ -123,6 +123,11 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
       tokenType = null;
       tokenStartIndex = i;
       for (let j = 0; j < tokenTypes.length; j++) {
+        if (tokenTypes[j].hasOwnProperty("from") &&
+            tokenTypes[j].from.indexOf(tokenTypeName) === -1) {
+          continue;
+        }
+
         tokenTypes[j].regex.lastIndex = i;
         if (tokenTypes[j].regex.test(code)) {
           tokenTypeName = tokenTypes[j].name;

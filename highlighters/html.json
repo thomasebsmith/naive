@@ -1,0 +1,49 @@
+{
+  "tokenTypes": [
+    {
+      "name": "tag",
+      "regex": "<[0-9a-zA-Z]"
+    },
+    {
+      "name": "closeTag",
+      "regex": "</[0-9a-zA-Z]+>"
+    },
+    {
+      "name": "attributeName",
+      "from": ["tag", "noquoteAttributeValue", "quoteAttributeValue"],
+      "regex": "\\s+[^\\0\"'>/=\\s]"
+    },
+    {
+      "name": "attributeEqual",
+      "from": ["attributeName"],
+      "regex": "\\s*=\\s*"
+    },
+    {
+      "name": "noQuoteAttributeValue",
+      "from": ["attributeEqual"],
+      "regex": "[^\\s\"'=><`]+"
+    }
+  ],
+  "tokens": {
+    "tag": {
+      "breakAfter": "<[0-9a-zA-Z]+",
+      "className": "builtInValue"
+    },
+    "closeTag": {
+      "breakAfter": "</[0-9a-zA-Z]+>",
+      "className": "builtInValue"
+    },
+    "attributeName": {
+      "breakAfter": "\\s+[^\\0\"'>/=\\s]+",
+      "className": "number"
+    },
+    "attributeEqual": {
+      "breakAfter": "\\s*=\\s*",
+      "className": "operator"
+    },
+    "noQuoteAttributeValue": {
+      "breakAfter": "[^\\s\"'=><`]+",
+      "className": "string"
+    }
+  }
+}
