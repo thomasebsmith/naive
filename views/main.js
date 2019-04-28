@@ -212,13 +212,8 @@ const loadFileContent = (filePath, callback = constants.noop) => {
     }
   };
 
-  if (fileIsLoaded) {
-    prepareToLeaveFile(onFileLeft);
-  }
-  else {
-    onFileLeft();
-    fileIsLoaded = true;
-  }
+  onFileLeft();
+  fileIsLoaded = true;
 };
 
 // saveFileContent(filePath, text[, callback]) - Saves text to the file at the
@@ -275,10 +270,15 @@ const storeProject = () => {
 
 // setProjectFile(relativePath) - Opens the file at relativePath within the
 //  current project.
-const setProjectFile = (relativePath) => {
-  currentProject.selectedRelativePath = relativePath;
-  storeProject();
-  reloadFileContent();
+const setProjectFile = (relativePath, callback = constants.noop) => {
+  const onFileLeft = () => {
+    currentProject.selectedRelativePath = relativePath;
+    storeProject();
+    reloadFileContent();
+  };
+  if (fileIsLoaded) {
+    prepareToLeaveFile(onFileLeft);
+  }
 };
 
 // reloadFileContent(callback) - Reloads the currently selected file.
