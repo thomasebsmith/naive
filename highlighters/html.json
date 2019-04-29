@@ -21,7 +21,12 @@
     {
       "name": "noQuoteAttributeValue",
       "from": ["attributeEqual"],
-      "regex": "[^\\s\"'=><`]+"
+      "regex": "[^\\s\"'=><`]"
+    },
+    {
+      "name": "quoteAttributeValue",
+      "from": ["attributeEqual"],
+      "regex": "([\"'])."
     }
   ],
   "tokens": {
@@ -43,6 +48,10 @@
     },
     "noQuoteAttributeValue": {
       "breakAfter": "[^\\s\"'=><`]+",
+      "className": "string"
+    },
+    "quoteAttributeValue": {
+      "breakAfter": "([\"'])[^\\1]*?\\1",
       "className": "string"
     }
   }
