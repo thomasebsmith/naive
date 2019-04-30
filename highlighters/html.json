@@ -9,8 +9,23 @@
       "regex": "</[0-9a-zA-Z]+>"
     },
     {
+      "name": "endTag",
+      "from": [
+        "tag", "attributeName",
+        "noQuoteAttributeValue", "quoteAttributeValue"
+      ],
+      "regex": "\\s*>"
+    },
+    {
+      "name": "comment",
+      "regex": "<!"
+    },
+    {
       "name": "attributeName",
-      "from": ["tag", "noquoteAttributeValue", "quoteAttributeValue"],
+      "from": [
+        "tag", "attributeName",
+        "noquoteAttributeValue", "quoteAttributeValue"
+      ],
       "regex": "\\s+[^\\0\"'>/=\\s]"
     },
     {
@@ -37,6 +52,14 @@
     "closeTag": {
       "breakAfter": "</[0-9a-zA-Z]+>",
       "className": "builtInValue"
+    },
+    "endTag": {
+      "breakAfter": "\\s*>",
+      "className": "builtInValue"
+    },
+    "comment": {
+      "breakAfter": "<![\\s\\S]*?>",
+      "className": "comment"
     },
     "attributeName": {
       "breakAfter": "\\s+[^\\0\"'>/=\\s]+",
