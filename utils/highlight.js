@@ -12,7 +12,9 @@ const highlighterDirectory = "../highlighters/";
 
 // Mime types
 const highlighters = {
-  "application/javascript": "javascript", "text/html": "html",
+  "application/javascript": "javascript",
+  "text/css": "css",
+  "text/html": "html",
   "text/markdown": "markdown",
   "text/plain": "text",
   "text/x-c-source": "c",

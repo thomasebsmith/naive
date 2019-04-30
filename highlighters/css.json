@@ -1,0 +1,50 @@
+{
+  "tokenTypes": [
+    {
+      "name": "property",
+      "from": ["ruleOpeningBrace", "propertySemicolon"],
+      "regex": "[^:]+?:"
+    },
+    {
+      "name": "propertyColon",
+      "from": ["property"],
+      "regex": ":"
+    },
+    {
+      "name": "propertyValue",
+      "from": ["propertyColon"],
+      "regex": "[^;]+?;"
+    },
+    {
+      "name": "propertySemicolon",
+      "from": ["propertyValue"],
+      "regex": ";"
+    },
+    {
+      "name": "ruleOpeningBrace",
+      "regex": "."
+    }
+  ],
+  "tokens": {
+    "property": {
+      "breakOn": ":",
+      "className": "number"
+    },
+    "propertyColon": {
+      "breakAfter": ":",
+      "className": "operator"
+    },
+    "propertyValue": {
+      "breakOn": ";",
+      "className": "identifier"
+    },
+    "propertySemicolon": {
+      "breakAfter": ";",
+      "className": "operator"
+    },
+    "ruleOpeningBrace": {
+      "breakAfter": ".",
+      "className": "plain"
+    }
+  }
+}
