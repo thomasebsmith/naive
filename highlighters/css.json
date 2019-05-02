@@ -1,6 +1,16 @@
 {
   "tokenTypes": [
     {
+      "name": "ruleOpeningBrace",
+      "from": ["selector"],
+      "regex": "{"
+    },
+    {
+      "name": "ruleClosingBrace",
+      "from": ["propertySemicolon", "ruleOpeningBrace"],
+      "regex": "\\s*?}"
+    },
+    {
       "name": "property",
       "from": ["ruleOpeningBrace", "propertySemicolon"],
       "regex": "[^:]+?:"
@@ -21,11 +31,19 @@
       "regex": ";"
     },
     {
-      "name": "ruleOpeningBrace",
-      "regex": "."
+      "name": "selector",
+      "regex": "[^{]*?{"
     }
   ],
   "tokens": {
+    "ruleOpeningBrace": {
+      "breakAfter": "{",
+      "className": "plain"
+    },
+    "ruleClosingBrace": {
+      "breakAfter": "}",
+      "className": "operator"
+    },
     "property": {
       "breakOn": ":",
       "className": "number"
@@ -42,9 +60,9 @@
       "breakAfter": ";",
       "className": "operator"
     },
-    "ruleOpeningBrace": {
-      "breakAfter": ".",
-      "className": "plain"
+    "selector": {
+      "breakOn": "{",
+      "className": "string"
     }
   }
 }
