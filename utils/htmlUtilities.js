@@ -46,3 +46,69 @@ class ElementStream {
   peek() { return this.elementList[this.index]; }
 };
 exports.ElementStream = ElementStream;
+
+class NestedElementStream extends ElementStream {
+  constructor(parentElement) {
+    this.parentStream = new ElementStream(parentElement.children);
+    if (this.parentStream.hasNext) {
+      this.childStream = new ElementStream(parentElement.peek().children);
+    }
+    else {
+      this.childStream = null;
+    }
+  }
+  get hasNext() {
+    return this.childStream !== null;
+  }
+  next() {
+    const toReturn = this.childStream.next();
+    if (!this.childStream.hasNext) {
+      if (this.parentStream.hasNext) {
+        this.childStream = new ElementStream(this.parentStream.next());
+      }
+      else {
+        this.childStream = null;
+      }
+    }
+    return toReturn;
+  }
+  peek() {
+    return this.childStream.peek();
+  }
+};
+exports.NestedElementStream = NestedElementStream;
+
+class HighlightedStream {
+  constructor(parentElement) {
+    this.nestedStream = NestedElementStream(parentElement);
+    this.peeked = null;
+  }
+  get hasNext() {
+    return this.peeked !== null || this.nestedStream.hasNext;
+  }
+  next() {
+    if (this.peeked !== null) {
+      const toReturn = this.peeked;
+      this.peeked = null;
+      return toReturn;
+    }
+    const nextElement = this.nestedStream.next();
+    const tokenTypeName = nextElement.dataset.tokenTypeName;
+    const startIndex = nextElement.dataset.startIndex;
+    let text = nextElement.textContent;
+    if (this.nestedStream.peek().dataset.isContinuation) {
+      text += this.nestedStream.next().textContent;
+    }
+    return {
+      tokenTypeName,
+      startIndex,
+      text
+    };
+  }
+  peek() {
+    if (this.peeked === null) {
+      this.peeked = this.next();
+    }
+    return this.peeked;
+  }
+};
