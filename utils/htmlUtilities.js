@@ -64,7 +64,7 @@ class ElementStream extends Stream {
 exports.ElementStream = ElementStream;
 
 class NestedElementStream extends Stream {
-  constructor(parentElement, parentStartIndex, childStartIndex) {
+  constructor(parentElement, parentStartIndex = 0, childStartIndex = 0) {
     super();
     this.parentStream = new ElementStream(parentElement.children,
       parentStartIndex);
@@ -83,7 +83,7 @@ class NestedElementStream extends Stream {
     const toReturn = this.childStream.next();
     if (!this.childStream.hasNext) {
       if (this.parentStream.hasNext) {
-        this.childStream = new ElementStream(this.parentStream.next());
+        this.childStream = new ElementStream(this.parentStream.next().children);
       }
       else {
         this.childStream = null;
@@ -101,7 +101,7 @@ class NestedElementStream extends Stream {
 exports.NestedElementStream = NestedElementStream;
 
 class HighlightedStream extends Stream {
-  constructor(parentElement, parentStartIndex, childStartIndex) {
+  constructor(parentElement, parentStartIndex = 0, childStartIndex = 0) {
     super();
     this.nestedStream = new NestedElementStream(parentElement, parentStartIndex,
       childStartIndex);

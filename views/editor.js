@@ -29,7 +29,11 @@ const require = (filename) => {
 // Imports
 const constants = require("../utils/constants");
 const highlight = require("../utils/highlight");
-const { htmlFromArray } = require("../utils/htmlUtilities");
+const {
+  htmlFromArray,
+  HighlightedStream,
+  NestedElementStream
+} = require("../utils/htmlUtilities");
 const contentAction = require("../utils/contentAction");
 const { handleKeys } = require("../utils/keyhandling");
 
@@ -40,10 +44,15 @@ let cursorEl = null;
 let cursorPosition = null;
 
 const reposition = (startingElementIndex) => {
-  let nextIndex = +contentEl.children[startingElementIndex].dataset.startIndex;
-  for (let i = startingElementIndex; i < contentEl.children.length; i++) {
-    contentEl.children[i].dataset.startIndex = nextIndex;
-    nextIndex += contentEl.children[i].textContent.length;
+  const stream = new NestedElementStream(contentEl);
+  for (let i = 0; i < startingElementIndex; ++i) {
+    stream.next();
+  }
+  let nextIndex = +stream.peek().dataset.startIndex;
+  while (stream.hasNext) {
+    stream.peek().dataset.startIndex = nextIndex;
+    nextIndex += stream.peek().textContent.length;
+    stream.next();
   }
 };
 
@@ -62,12 +71,14 @@ const getElementIndex = (position) => {
     // fall in the first element.
     return 0;
   }
-  let i;
-  for (i = 0; i < contentEl.children.length; i++) {
-    let nextPosition = +contentEl.children[i].dataset.startIndex;
+  const stream = new HighlightedStream(contentEl);
+  let i = 0;
+  while (stream.hasNext) {
+    let nextPosition = stream.next().startIndex;
     if (nextPosition > position) {
       return i - 1;
     }
+    ++i;
   }
   return i - 1;
 };
@@ -80,13 +91,21 @@ const getRelativePosition = (element, position) => {
   );
 };
 
+const getContentChildAt = (elementIndex) => {
+  const stream = new NestedElementStream(contentEl);
+  for (let i = 0; i < elementIndex; ++i) {
+    stream.next();
+  }
+  return stream.peek();
+};
+
 const messageQueue = [];
 const actions = {
   "cursorTo": (position) => {
     if (position === cursorPosition) { return; }
     if (position < 0) { position = 0; }
     const elementIndex = getElementIndex(position);
-    const element = contentEl.children[elementIndex];
+    const element = getContentChildAt(elementIndex);
     const actualPosition = Math.max(Math.min(
       getRelativePosition(element, position),
       element.textContent.length - 1,
@@ -130,7 +149,7 @@ const actions = {
     }
     else {
       const elementIndex = getElementIndex(position - 1);
-      const element = contentEl.children[elementIndex];
+      const element = getContentChildAt(elementIndex);
       const elementPosition = +element.dataset.startIndex;
       let elementContent = element.textContent;
       const actualPosition = getRelativePosition(element, position);
@@ -152,7 +171,7 @@ const actions = {
   },
   "remove": (position, count) => {
     const elementIndex = getElementIndex(position);
-    let element = contentEl.children[elementIndex];
+    let element = getContentChildAt(elementIndex);
     let relativePosition = getRelativePosition(element, position);
     currentText = currentText.substring(0, position) +
                   currentText.substring(position + count);
@@ -189,7 +208,14 @@ const actions = {
   "set": (content) => {
     currentText = content;
     contentEl.innerHTML = "";
-    htmlFromArray(highlight(content, language), contentEl);
+    const tokens = highlight(content, language);
+    let lineEl;
+    for (let line of tokens) {
+      lineEl = document.createElement("span");
+      lineEl.classList.add("line");
+      htmlFromArray(line, lineEl);
+      contentEl.appendChild(lineEl);
+    }
     cursorEl = null;
     actions.cursorTo(0);
   },
