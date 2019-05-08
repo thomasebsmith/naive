@@ -6,7 +6,7 @@
 // Imports
 const fs = require("fs");
 const path = require("path");
-const { htmlFromArray } = require("../utils/htmlUtilities");
+const { htmlFromArray, HighlightedStream } = require("../utils/htmlUtilities");
 
 const highlighterDirectory = "../highlighters/";
 
@@ -53,23 +53,35 @@ const formatHighlighter = (highlighter) => {
 //  the root element is given by element. The index of the modified element
 //  in the root element's child list is given by index.
 const rehighlightHTML = (highlighter, code, element, index) => {
-  let i = index;
-  const elementList = element.children;
+  const codeStream = new HighlightedStream(element);
+  for (let i = 0; i < index; ++i) {
+    if (!codeStream.hasNext) {
+      throw "Invalid index passed to rehighlightHTML";
+    }
+    codeStream.next();
+  }
+  let firstElement;
+  if (codeStream.hasNext) {
+    firstElement = codeStream.peek();
+  }
+  else {
+    firstElement = null;
+  }
   formatHighlighter(highlighter);
   let highlighted, done;
   const generator = generateHighlightedToken(
-    highlighter, code, +elementList[index].dataset.startIndex
+    highlighter, code, codeStream.peek().startIndex
   );
   const newTokens = [];
   while (({done, value: highlighted} = generator.next()) && !done) {
-    while (i < elementList.length &&
-           highlighted.data.startIndex > +elementList[i].dataset.startIndex) {
-      i++;
+    while (codeStream.hasNext &&
+           highlighted.data.startIndex > codeStream.peek().startIndex) {
+      codeStream.next();
     } 
-    if (i < elementList.length &&
-      +elementList[i].dataset.startIndex === highlighted.data.startIndex &&
-      elementList[i].dataset.tokenTypeName === highlighted.data.tokenTypeName &&
-      elementList[i].textContent === highlighted.text) {
+    if (codeStream.hasNext &&
+      codeStream.peek().startIndex === highlighted.data.startIndex &&
+      codeStream.peek().tokenTypeName === highlighted.data.tokenTypeName &&
+      codeStream.peek().text === highlighted.text) {
       break;
     }
     newTokens.push(highlighted);
@@ -77,17 +89,46 @@ const rehighlightHTML = (highlighter, code, element, index) => {
   if (done) {
     // If we ran out of tokens before iterating through all the old elements, we
     //  need to replace *all* of the elements.
-    i = elementList.length;
+    codeStream.invalidate();
   }
   // Now, replace the HTML elements that are no longer up-to-date
-  for (let j = i - 1; j >= index; j--) {
-    element.removeChild(elementList[j]);
+  let elementToRemove;
+  if (codeStream.hasNext) {
+    elementToRemove = codeStream.peek()._element.previousElementSibling;
+    if (elementToRemove === null) {
+      elementToRemove = codeStream.peek()._element.parentNode.
+        previousElementSibling.lastElementChild;
+    }
   }
-  const newElements = htmlFromArray(newTokens);
-  const elementToInsertBefore = index >= elementList.length ? null : elementList[index];
-  for (let el of newElements) {
-    element.insertBefore(el, elementToInsertBefore);
+  let victim;
+  while (elementToRemove !== firstElement) {
+    victim = elementToRemove;
+    elementToRemove = elementToRemove.previousElementSibling;
+    if (elementToRemove === null) {
+      elementToRemove = victim.parentNode.previousElementSibling.
+        lastElementChild;
+    }
+    victim.parentNode.removeChild(victim);
   }
+  const newElements = newTokens.map(htmlFromArray);
+  const elementToInsertBefore = elementToRemove.parentNode;
+  let lineEl;
+  for (let i = 0; i < newElements.length; ++i) {
+    if (i !== newElements.length - 1) {
+      lineEl = document.createElement("div");
+      lineEl.classList.add("line");
+      for (let el of newElements[i]) {
+        lineEl.appendChild(el);
+      }
+      element.insertBefore(lineEl, elementToInsertBefore);
+    }
+    else {
+      for (let el of newElements[i]) {
+        elementToInsertBefore.insertBefore(el, elementToRemove);
+      }
+    }
+  }
+  elementToRemove.parentNode.removeChild(elementToRemove);
 };
 
 // generateHighlightedToken(highlighter, code, startIndex = 0) - This generator
@@ -112,14 +153,18 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
     if (broken) {
       broken = false;
       if (tokenType !== null) {
-        yield ({
-          text: token,
-          className: tokenType.className,
-          data: {
-            tokenTypeName: tokenTypeName,
-            startIndex: tokenStartIndex
-          }
-        });
+        const tokenLines = token.split("\n");
+        for (let i = 0; i < tokenLines.length; ++i) {
+          yield ({
+            text: tokenLines[i] + (i === tokenLines.length - 1 ? "" : "\n"),
+            className: tokenType.className,
+            data: {
+              isContinuation: i !== 0,
+              tokenTypeName: tokenTypeName,
+              startIndex: tokenStartIndex
+            }
+          });
+        }
       }
       token = "";
       tokenType = null;
@@ -181,21 +226,25 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
       token += code.charAt(i);
     }
   }
-  yield ({
-    text: token,
-    className: tokenType.className,
-    data: {
-      tokenTypeName: tokenTypeName,
-      startIndex: tokenStartIndex
-    }
-  });
+  const tokenLines = token.split("\n");
+  for (let i = 0; i < tokenLines.length; ++i) {
+    yield ({
+      text: tokenLines[i],
+      className: tokenType.className,
+      isContinuation: i !== 0,
+      data: {
+        tokenTypeName: tokenTypeName,
+        startIndex: tokenStartIndex
+      }
+    });
+  }
 }
 
 // defaultToken(text) - Produces a default token containing the text in text.
 const defaultToken = (text) => {
   return {
     className: "plain",
-    text: code,
+    text: text,
     data: {
       startIndex: 0,
       tokenTypeName: "__default__"
@@ -207,7 +256,7 @@ const defaultToken = (text) => {
 //  objects resulting from highlighting code with highlighter.
 const highlightWith = (highlighter, code) => {
   if (!code) {
-    return [defaultToken(code)];
+    return [code.split("\n").map(defaultToken)];
   }
   const generator = generateHighlightedToken(highlighter, code);
   const result = [];

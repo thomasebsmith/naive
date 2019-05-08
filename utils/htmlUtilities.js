@@ -33,25 +33,44 @@ exports.htmlFromArray = (array, parentEl = null) => {
   return parentEl;
 };
 
+class Stream {
+  get hasNext() { throw "Getter \"hasNext\" must be provided by subclasses"; }
+  next() { throw "Method \"next\" must be provided by subclasses"; }
+  peek() { throw "Method \"peek\" must be provided by subclasses"; }
+  invalidate() { throw "Method \"invalidate\" must be provided by subclasses"; }
+  collect() {
+    let collection = [];
+    while (this.hasNext) {
+      collection.push(this.next());
+    }
+    return collection;
+  }
+};
+
 // ElementStream(elementList) - Creates a simple stream based on the given
 //  list of elements. ElementStreams must provide the hasNext, next, and peek
 //  methods at a minimum.
-class ElementStream {
-  constructor(elementList) {
-    this.elementList = elementList;
-    this.index = 0;
+class ElementStream extends Stream {
+  constructor(elementList, startIndex = 0) {
+    super();
+    this.elementList = Array.prototype.slice.call(elementList);
+    this.index = startIndex;
   }
   get hasNext() { return this.index < this.elementList.length; }
   next() { return this.elementList[this.index++]; }
   peek() { return this.elementList[this.index]; }
+  invalidate() { this.index = this.elementList.length; }
 };
 exports.ElementStream = ElementStream;
 
-class NestedElementStream extends ElementStream {
-  constructor(parentElement) {
-    this.parentStream = new ElementStream(parentElement.children);
+class NestedElementStream extends Stream {
+  constructor(parentElement, parentStartIndex, childStartIndex) {
+    super();
+    this.parentStream = new ElementStream(parentElement.children,
+      parentStartIndex);
     if (this.parentStream.hasNext) {
-      this.childStream = new ElementStream(parentElement.peek().children);
+      this.childStream = new ElementStream(this.parentStream.peek().children,
+        childStartIndex);
     }
     else {
       this.childStream = null;
@@ -75,12 +94,17 @@ class NestedElementStream extends ElementStream {
   peek() {
     return this.childStream.peek();
   }
+  invalidate() {
+    this.childStream = null;
+  }
 };
 exports.NestedElementStream = NestedElementStream;
 
-class HighlightedStream {
-  constructor(parentElement) {
-    this.nestedStream = NestedElementStream(parentElement);
+class HighlightedStream extends Stream {
+  constructor(parentElement, parentStartIndex, childStartIndex) {
+    super();
+    this.nestedStream = new NestedElementStream(parentElement, parentStartIndex,
+      childStartIndex);
     this.peeked = null;
   }
   get hasNext() {
@@ -94,15 +118,17 @@ class HighlightedStream {
     }
     const nextElement = this.nestedStream.next();
     const tokenTypeName = nextElement.dataset.tokenTypeName;
-    const startIndex = nextElement.dataset.startIndex;
+    const startIndex = +nextElement.dataset.startIndex;
     let text = nextElement.textContent;
-    if (this.nestedStream.peek().dataset.isContinuation) {
+    while (this.nestedStream.hasNext &&
+      this.nestedStream.peek().dataset.isContinuation === "true") {
       text += this.nestedStream.next().textContent;
     }
     return {
       tokenTypeName,
       startIndex,
-      text
+      text,
+      _element: nextElement
     };
   }
   peek() {
@@ -111,4 +137,9 @@ class HighlightedStream {
     }
     return this.peeked;
   }
+  invalidate() {
+    this.peeked = null;
+    this.nestedStream.invalidate();
+  }
 };
+exports.HighlightedStream = HighlightedStream;
