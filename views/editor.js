@@ -171,7 +171,11 @@ const actions = {
   },
   "remove": (position, count) => {
     const elementIndex = getElementIndex(position);
-    let element = getContentChildAt(elementIndex);
+    const stream = new NestedElementStream(contentEl);
+    for (let i = 0; i < elementIndex; ++i) {
+      stream.next();
+    }
+    let element = stream.peek();
     let relativePosition = getRelativePosition(element, position);
     currentText = currentText.substring(0, position) +
                   currentText.substring(position + count);
@@ -186,7 +190,7 @@ const actions = {
                   elementContent.substring(relativePosition + charsToRemove);
       removedChars += charsToRemove;
       relativePosition = 0;
-      element = element.nextElementSibling;
+      element = stream.next();
     }
     rehighlight(elementIndex);
     if (cursorPosition !== null && position < cursorPosition) {
