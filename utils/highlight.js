@@ -239,7 +239,7 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
   const tokenLines = token.split("\n");
   for (let i = 0; i < tokenLines.length; ++i) {
     yield ({
-      text: tokenLines[i],
+      text: tokenLines[i] + (i === tokenLines.length - 1 ? "" : "\n"),
       className: tokenType.className,
       isContinuation: i !== 0,
       data: {
