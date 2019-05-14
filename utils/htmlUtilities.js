@@ -82,8 +82,9 @@ class NestedElementStream extends Stream {
   next() {
     const toReturn = this.childStream.next();
     if (!this.childStream.hasNext) {
+      this.parentStream.next();
       if (this.parentStream.hasNext) {
-        this.childStream = new ElementStream(this.parentStream.next().children);
+        this.childStream = new ElementStream(this.parentStream.peek().children);
       }
       else {
         this.childStream = null;
