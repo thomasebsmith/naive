@@ -129,6 +129,14 @@ const actions = {
     range.setEnd(node, actualPosition);
     range.insertNode(cursorEl);
   },
+  "cursorDown": () => {
+    const currentLineEl = cursorEl.parentElement.parentElement;
+    const nextLineEl = currentLineEl.nextSibling;
+    // TODO: Use previous offset for next line.
+    const startIndex = +currentLineEl.lastChild.dataset.startIndex +
+      currentLineEl.lastChild.textContent.length;
+    actions.cursorTo(startIndex);
+  },
   "cursorLeft": () => {
     actions.cursorTo(cursorPosition - 1);
   },
