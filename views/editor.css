@@ -9,8 +9,45 @@ body {
   font-family: var(--user-font);
   white-space: pre-wrap;
   overflow-wrap: break-word;
-  padding-top: 3%;
-  padding-left: 6px;
+  counter-reset: line-number;
+  display: inline-block;
+}
+
+#content>.line::before {
+  counter-increment: line-number;
+  content: counter(line-number);
+  color: gray; /* TODO */
+  margin: 0 5px;
+  display: inline-block;
+  width: 0.6em;
+}
+
+#content>.line:nth-last-child(n + 10) ~ .line::before {
+  width: 1.2em;
+}
+#content>.line:nth-last-child(n + 10)::before {
+  width: 1.2em;
+}
+
+#content>.line:nth-last-child(n + 100) ~ .line::before {
+  width: 1.8em;
+}
+#content>.line:nth-last-child(n + 100)::before {
+  width: 1.8em;
+}
+
+#content>.line:nth-last-child(n + 1000) ~ .line::before {
+  width: 2.4em;
+}
+#content>.line:nth-last-child(n + 1000)::before {
+  width: 2.4em;
+}
+
+#content>.line:nth-last-child(n + 10000) ~ .line::before {
+  width: 3.0em;
+}
+#content>.line:nth-last-child(n + 10000)::before {
+  width: 3.0em;
 }
 
 .cursor {
