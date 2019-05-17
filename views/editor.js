@@ -71,10 +71,10 @@ const getElementIndex = (position) => {
     // fall in the first element.
     return 0;
   }
-  const stream = new HighlightedStream(contentEl);
+  const stream = new NestedElementStream(contentEl);
   let i = 0;
   while (stream.hasNext) {
-    let nextPosition = stream.next().startIndex;
+    let nextPosition = +stream.next().dataset.startIndex;
     if (nextPosition > position) {
       return i - 1;
     }
@@ -85,10 +85,7 @@ const getElementIndex = (position) => {
 
 const getRelativePosition = (element, position) => {
   const elementPosition = +element.dataset.startIndex;
-  return Math.min(
-    position - elementPosition,
-    element.textContent.length
-  );
+  return position - elementPosition;
 };
 
 const getContentChildAt = (elementIndex) => {
@@ -106,11 +103,14 @@ const actions = {
     if (position < 0) { position = 0; }
     const elementIndex = getElementIndex(position);
     const element = getContentChildAt(elementIndex);
+    const length = element.textContent.length;
+
     const actualPosition = Math.max(Math.min(
       getRelativePosition(element, position),
-      element.textContent.length - 1,
+      length - 1,
     ), 0);
-    cursorPosition = Math.min(actualPosition + (+element.dataset.startIndex));
+    cursorPosition = Math.min(+element.dataset.startIndex + actualPosition);
+
     if (cursorEl !== null && cursorEl.parentElement) {
       cursorEl.parentElement.textContent =
         cursorEl.parentElement.textContent;
