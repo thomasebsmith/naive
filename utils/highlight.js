@@ -174,6 +174,8 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
               startIndex: tokenStartIndex
             }
           });
+          tokenStartIndex += tokenLines[i].length +
+            (i !== tokenLines.length - 1);
         }
       }
       token = "";
