@@ -14,6 +14,12 @@ exports.handleKeys = (target, contentAction) => {
       case "ArrowRight":
         contentAction("cursorRight");
         break;
+      case "ArrowDown":
+        contentAction("cursorDown");
+        break;
+      case "ArrowUp":
+        contentAction("cursorUp");
+        break;
       // Deleting
       case "Backspace":
       case "Delete":

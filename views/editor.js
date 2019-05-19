@@ -132,9 +132,31 @@ const actions = {
   "cursorDown": () => {
     const currentLineEl = cursorEl.parentElement.parentElement;
     const nextLineEl = currentLineEl.nextSibling;
-    // TODO: Use previous offset for next line.
-    const startIndex = +currentLineEl.lastChild.dataset.startIndex +
-      currentLineEl.lastChild.textContent.length;
+    if (nextLineEl === null) {
+      return;
+    }
+    const lineOffset = cursorPosition -
+      +currentLineEl.firstChild.dataset.startIndex;
+    const startIndex = Math.min(
+      +nextLineEl.firstChild.dataset.startIndex + lineOffset,
+      +nextLineEl.lastChild.dataset.startIndex +
+        nextLineEl.lastChild.textContent.length - 1
+    );
+    actions.cursorTo(startIndex);
+  },
+  "cursorUp": () => {
+    const currentLineEl = cursorEl.parentElement.parentElement;
+    const prevLineEl = currentLineEl.previousSibling;
+    if (prevLineEl === null) {
+      return;
+    }
+    const lineOffset = cursorPosition -
+      +currentLineEl.firstChild.dataset.startIndex;
+    const startIndex = Math.min(
+      +prevLineEl.firstChild.dataset.startIndex + lineOffset,
+      +prevLineEl.lastChild.dataset.startIndex +
+        prevLineEl.lastChild.textContent.length - 1
+    );
     actions.cursorTo(startIndex);
   },
   "cursorLeft": () => {
