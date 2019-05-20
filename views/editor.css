@@ -50,6 +50,10 @@ body {
   width: 3.0em;
 }
 
+#content>.line>:last-child>.cursor:last-child::before {
+  content: " ";
+}
+
 .cursor {
   background-color: var(--user-selection-background);
 }
