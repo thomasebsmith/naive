@@ -106,6 +106,36 @@ class HighlightedStream extends Stream {
     super();
     this.nestedStream = new NestedElementStream(parentElement, parentStartIndex,
       childStartIndex);
+  }
+  get hasNext() {
+    return this.nestedStream.hasNext;
+  }
+  next() {
+    const nextElement = this.nestedStream.next;
+    const tokenTypeName = nextElement.dataset.tokenTypeName;
+    const startIndex = +nextElement.dataset.startIndex;
+    let text = nextElement.textContent;
+    return {
+      tokenTypeName,
+      startIndex,
+      text,
+      _element: nextElement
+    };
+  }
+  peek() {
+    return this.nestedStream.peek();
+  }
+  invalidate() {
+    this.nestedStream.invalidate();
+  }
+};
+exports.HighlightedStream = HighlightedStream;
+
+class HighlightedMergedStream extends Stream {
+  constructor(parentElement, parentStartIndex = 0, childStartIndex = 0) {
+    super();
+    this.nestedStream = new NestedElementStream(parentElement, parentStartIndex,
+      childStartIndex);
     this.peeked = null;
   }
   get hasNext() {
@@ -143,4 +173,4 @@ class HighlightedStream extends Stream {
     this.nestedStream.invalidate();
   }
 };
-exports.HighlightedStream = HighlightedStream;
+exports.HighlightedMergedStream = HighlightedMergedStream;

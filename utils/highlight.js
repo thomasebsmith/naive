@@ -123,7 +123,7 @@ const rehighlightHTML = (highlighter, code, element, index) => {
   const newElements = newTokens.map(token => htmlFromArray(token));
   const elementToInsertBefore = elementToRemove.parentNode;
   let lineEl;
-  for (let i = 0; i < newElements.length; ++i) {
+  for (let i = newElements.length - 1; i >= 0; --i) {
     if (i !== newElements.length - 1) {
       lineEl = document.createElement("span");
       lineEl.classList.add("line");
