@@ -101,8 +101,14 @@ const rehighlightHTML = (highlighter, code, element, index) => {
   if (codeStream.hasNext) {
     elementToRemove = codeStream.peek()._element.previousElementSibling;
     if (elementToRemove === null) {
-      elementToRemove = codeStream.peek()._element.parentNode.
-        previousElementSibling.lastElementChild;
+      if (codeStream.peek()._element.parentNode.previousElementSibling ===
+        undefined) {
+        elementToRemove = firstElement;
+      }
+      else {
+        elementToRemove = codeStream.peek()._element.parentNode.
+          previousElementSibling.lastChild;
+      }
     }
   }
   let victim;

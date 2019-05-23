@@ -111,7 +111,7 @@ class HighlightedStream extends Stream {
     return this.nestedStream.hasNext;
   }
   next() {
-    const nextElement = this.nestedStream.next;
+    const nextElement = this.nestedStream.next();
     const tokenTypeName = nextElement.dataset.tokenTypeName;
     const startIndex = +nextElement.dataset.startIndex;
     let text = nextElement.textContent;
@@ -123,7 +123,16 @@ class HighlightedStream extends Stream {
     };
   }
   peek() {
-    return this.nestedStream.peek();
+    const peekedElement = this.nestedStream.peek();
+    const tokenTypeName = peekedElement.dataset.tokenTypeName;
+    const startIndex = +peekedElement.dataset.startIndex;
+    let text = peekedElement.textContent;
+    return {
+      tokenTypeName,
+      startIndex,
+      text,
+      _element: peekedElement
+    };
   }
   invalidate() {
     this.nestedStream.invalidate();
