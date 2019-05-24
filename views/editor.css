@@ -50,7 +50,7 @@ body {
   width: 3.0em;
 }
 
-#content>.line>:last-child>.cursor:last-child::before {
+#content>.line>:last-child>.cursor.final-character::before {
   content: " ";
 }
 

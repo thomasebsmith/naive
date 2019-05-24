@@ -120,6 +120,9 @@ const actions = {
     let elementText = element.textContent;
     const character = elementText.charAt(actualPosition);
     cursorEl.textContent = character;
+    if (actualPosition === elementText.length - 1) {
+      cursorEl.classList.add("final-character");
+    }
     element.textContent = elementText =
       elementText.substring(0, actualPosition) +
       elementText.substring(actualPosition + 1);
