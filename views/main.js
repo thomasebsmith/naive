@@ -46,6 +46,12 @@ const definedMessages = {
         properties: ["openDirectory", "openFile", "createDirectory"]
       }
     }, (projectPath) => {
+      if (!projectPath) {
+        // If no project path was selected (the dialog was canceled), don't
+        //  load any projects.
+        return;
+      }
+
       // Once a project path is selected in the dialog, use it to load the
       //  project.
       projectPath = projectPath[0];
