@@ -99,7 +99,7 @@ const getContentChildAt = (elementIndex) => {
 const messageQueue = [];
 const actions = {
   "cursorTo": (position) => {
-    if (position === cursorPosition) { return; }
+    if (cursorEl !== null && position === cursorPosition) { return; }
     if (position < 0) { position = 0; }
     const elementIndex = getElementIndex(position);
     const element = getContentChildAt(elementIndex);
@@ -133,6 +133,9 @@ const actions = {
     range.insertNode(cursorEl);
   },
   "cursorDown": () => {
+    if (cursorEl === null) {
+      cursorTo(0);
+    }
     const currentLineEl = cursorEl.parentElement.parentElement;
     const nextLineEl = currentLineEl.nextSibling;
     if (nextLineEl === null) {
@@ -148,6 +151,9 @@ const actions = {
     actions.cursorTo(startIndex);
   },
   "cursorUp": () => {
+    if (cursorEl === null) {
+      cursorTo(0);
+    }
     const currentLineEl = cursorEl.parentElement.parentElement;
     const prevLineEl = currentLineEl.previousSibling;
     if (prevLineEl === null) {
