@@ -15,13 +15,15 @@ more. A Vim emulation mode will also be added.
 - Syntax highlighting does not work when inserting links in Markdown.
 - The current project is only remembered for one window.
 - Rehighlighting text isn't guaranteed to keep the text the same.
+- Inserting text sometimes messes up line breaks.
 
 #### Project TODOs
 - Store highlighting state as a JavaScript object rather than relying on the
   DOM structure.
-  - Consider fast-inserting text without rehighlighting and rehighlighting
-    when time is available.
+- Consider fast-inserting text without rehighlighting and rehighlighting
+  when time is available.
 - Add true end-of-line insertion (including at the end of the file).
+- Implement addon API.
 
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
