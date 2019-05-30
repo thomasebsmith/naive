@@ -27,6 +27,21 @@ const defaultTokenType = {
   className: "plain"
 };
 
+class HighlightedToken {
+  constructor(tokenType, text, startIndex) {
+    this.tokenType = tokenType;
+    this.text = text;
+    this.startIndex = startIndex;
+  }
+  toHTML() {
+    return this.text.split("\n").map((line, index) => {
+      const element = document.createElement("span");
+      element.dataset.tokenType = this.tokenType;
+      element.textContent = text;
+    });
+  }
+};
+
 // formatHighlighter(highlighter) - Converts the string properties of
 //  highlighter into regular expressions if necessary.
 // Note: Don't use the __formatted__ property in your highlighters, as it
