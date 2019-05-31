@@ -34,11 +34,43 @@ class HighlightedToken {
     this.startIndex = startIndex;
   }
   toHTML() {
-    return this.text.split("\n").map((line, index) => {
+    return this.text.split("\n").map((line) => {
       const element = document.createElement("span");
       element.dataset.tokenType = this.tokenType;
-      element.textContent = text;
+      element.textContent = this.text;
+      return element;
     });
+  }
+};
+
+class HighlightedBlock {
+  constructor() {
+    this.tokens = [];
+  }
+  appendToken(token) {
+    this.tokens.push(token);
+  }
+  toHTML() {
+    let lineEl = document.createElement("span");
+    lineEl.classList.add("line");
+    let lines = [lineEl];
+    let html;
+    for (const token of this.tokens) {
+      html = token.toHTML();
+      if (html.length === 1) {
+        lines[lines.length - 1].appendChild(html[0]);
+      }
+      else if (html.length > 1) {
+        lines[lines.length - 1].appendChild(html[0]);
+        for (let i = 1; i < html.length; ++i) {
+          lineEl = document.createElement("span");
+          lineEl.classList.add("line");
+          lineEl.appendChild(html[i]);
+          lines.push(lineEl);
+        }
+      }
+    }
+    return lines;
   }
 };
 
