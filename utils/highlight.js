@@ -51,7 +51,7 @@ class HighlightedBlock {
     this.tokens.push(token);
   }
   toHTML() {
-    let lineEl = document.createElement("span");
+    const lineEl = document.createElement("span");
     lineEl.classList.add("line");
     let lines = [lineEl];
     let html;
@@ -71,6 +71,89 @@ class HighlightedBlock {
       }
     }
     return lines;
+  }
+  slice(startIndex = 0, endIndex = this.tokens.length) {
+    const theSlice = new HighlightedBlock();
+    for (let i = startIndex; i < endIndex; ++i) {
+      theSlice.appendToken(this.tokens[i]);
+    }
+    return theSlice;
+  }
+  // firstTokenElement is the first element that overlaps with the given
+  //  HighlightedBlock. It should be a *token* element, not a line element.
+  // countToReplace is the number of HTML token elements that should be
+  //  replaced (the elements are replaced with elements corresponding to *all*
+  //  the elements in this HighlightedBlock.
+  replaceHTML(firstTokenElement, countToReplace) {
+    let startingLine = firstTokenElement.parentElement;
+  
+    // Next, remove the token elements to be replaced.
+    let toBeRemoved = firstTokenElement;
+    let removedCount = 0;
+    while (removedCount < countToReplace && toBeRemoved !== null) {
+      let victim = toBeRemoved;
+      toBeRemoved = toBeRemoved.nextSibling;
+      victim.parentElement.removeChild(victim);
+      ++removedCount;
+    }
+    let lineToRemove = startingLine.nextSibling;
+    while (lineToRemove !== null && removedCount +
+           lineToRemove.childElementCount <= countToReplace) {
+      removedCount += lineToRemove.childElementCount;
+      let victim = lineToRemove;
+      lineToRemove = lineToRemove.nextSibling;
+      victim.parentElement.removeChild(victim);
+    }
+    if (lineToRemove === null) {
+      throw "Invalid arguments to .replaceHTML(): there were not" +
+        countToReplace + "(=" + countToReplace + ") elements to replace";
+    }
+    toBeRemoved = lineToRemove.firstChild;
+    while (removedCount < countToReplace && toBeRemoved !== null) {
+      let victim = toBeRemoved;
+      toBeRemoved = toBeRemoved.nextSibling;
+      victim.parentElement.removeChild(victim);
+      ++removedCount;
+    }
+
+    // Now, startingLine and lineToRemove should be adjacent lines, each
+    //  containing only the remaining tokens (if any).
+    const htmlToInsert = this.toHTML();
+    if (htmlToInsert.length <= 1) {
+      // If there are no lines to insert (or only 1), join the
+      //  starting/ending lines of the removed section.
+      let insertBeforeMe = lineToRemove.lastChild;
+      for (let i = 0; i < lineToRemove.children.length; ++i) {
+        let elementToMove = lineToRemove.children[i];
+        lineToRemove.removeChild(elementToMove);
+        startingLine.appendChild(elementToMove);
+      }
+      insertBeforeMe = insertBeforeMe.nextSibling;
+      lineToRemove.parentElement.removeChild(lineToRemove);
+      // Insert any applicable lines.
+      if (htmlToInsert.length === 1) {
+        startingLine.insertBefore(htmlToInsert[0], insertBeforeMe);
+      }
+    }
+    else {
+      // Otherwise, if there is more than 1 line to insert, insert the
+      //  first line on startingLine, the last line on lineToRemove, and
+      //  all the other lines in between.
+      for (let i = 0; i < htmlToInsert[0].childElementCount; ++i) {
+        let elementToMove = htmlToInsert[0].children[i];
+        htmlToInsert[0].removeChild(elementToMove);
+        startingLine.appendChild(elementToMove);
+      }
+      for (let i = 1; i < htmlToInsert.length - 1; ++i) {
+        lineToRemove.parentElement.insertBefore(htmlToInsert[i], lineToRemove);
+      }
+      for (let i = 0;
+           i < htmlToInsert[htmlToInsert.length - 1].childElementCount; ++i) {
+        let elementToMove = htmlToInsert[htmlToInsert.length - 1].children[i];
+        htmlToInsert[htmlToInsert.length - 1].removeChild(elementToMove);
+        lineToRemove.insertBefore(elementToMove, lineToRemove.firstChild);
+      }
+    }
   }
 };
 
