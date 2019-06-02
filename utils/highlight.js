@@ -33,6 +33,13 @@ class HighlightedToken {
     this.text = text;
     this.startIndex = startIndex;
   }
+  equals(other) {
+    return this.contentEquals(other) && this.startIndex === other.startIndex;
+  }
+  contentEquals(other) {
+    return this.tokenType === other.tokenType &&
+           this.text === other.text;
+  }
   toHTML() {
     return this.text.split("\n").map((line) => {
       const element = document.createElement("span");
@@ -79,6 +86,33 @@ class HighlightedBlock {
     }
     return theSlice;
   }
+  // Returns a pair [startIndex, lastIndex] such that the range of indices
+  //  [startIndex, lastIndex) in this HighlightedBlock contains all differences
+  //  between this block and the blockToCompare. Returns null if there are no
+  //  differences.
+  changedRange(blockToCompare) {
+    let startIndex = 0;
+    let differencesFound = false;
+    while (startIndex < this.tokens.length &&
+           startIndex < blockToCompare.tokens.length) {
+      if (!this.tokens[startIndex].contentEquals(
+           blockToCompare.tokens[startIndex])) {
+        differencesFound = true;
+        break;
+      }
+      ++startIndex;
+    }
+    if (!differencesFound) {
+      return null;
+    }
+    let endOffset = 0;
+    while (this.tokens[this.tokens.length - endOffset - 1].contentEquals(
+        blockToCompare.tokens[blockToCompare.tokens.length - endOffset - 1])) {
+      ++endOffset;
+    }
+    return [startIndex, this.tokens.length - endOffset];
+  }
+    
   // firstTokenElement is the first element that overlaps with the given
   //  HighlightedBlock. It should be a *token* element, not a line element.
   // countToReplace is the number of HTML token elements that should be
