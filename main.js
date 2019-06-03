@@ -17,6 +17,7 @@ const {
 const constants = require("./utils/constants");
 const setMenus = require("./utils/menus");
 const prefs = new (require("./utils/prefs"))();
+require("./utils/aboutPanel").setup();
 
 let attemptingToQuit = false;
 
