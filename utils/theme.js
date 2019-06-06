@@ -1,20 +1,10 @@
 class Style {
-  constructor(name, color, weight, style, decoration) {
-    this.name = name;
-    this.color = color;
-    this.weight = weight;
-    this.style = style;
-    this.decoration = decoration;
+  constructor(property, value) {
+    this.property = property + "";
+    this.value = value + "";
   }
-  addToDocument(document) {
-    document.body.style.setProperty("--user-" + this.name + "-color",
-      this.color);
-    document.body.style.setProperty("--user-" + this.name + "-weight",
-      this.weight);
-    document.body.style.setProperty("--user-" + this.name + "-style",
-      this.style);
-    document.body.style.setProperty("--user-" + this.name + "-decoration",
-      this.decoration);
+  addToDocument(document, prefix = "") {
+    document.body.style.setProperty("--user-" + this.property, this.value);
   }
 };
 
@@ -32,5 +22,25 @@ class Theme {
   setStyle(name, value) {
     this.styles[name] = value;
     return this;
+  }
+};
+Theme.fromNestedObject = (nestedObject, defaultStyle, prefix = "") => {
+  const theme = new Theme(defaultStyle);
+  for (let i in nestedObject) {
+    if (Object.prototype.hasOwnProperty.call(nestedObject, i)) {
+      if (typeof nestedObject[i] === "object") {
+        const nestedTheme = Theme.fromNestedObject(
+          nestedObject[i],
+          defaultStyle,
+          prefix + "-" + i
+        );
+        for (let j in nestedTheme.styles) {
+          theme.setStyle(j, nestedTheme.styles[j]);
+        }
+      }
+      else {
+        theme.setStyle(i, new Style(prefix + i, nestedObject[i]);
+      }
+    }
   }
 };
