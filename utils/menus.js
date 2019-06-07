@@ -56,6 +56,12 @@ const setMenus = (sendAction) => {
       submenu: [
         {role: 'about'},
         {type: 'separator'},
+        {
+          label: "Preferences...",
+          accelerator: "CommandOrControl+,",
+          click: () => sendAction({type: "openPreferences"})
+        },
+        {type: "separator"},
         {role: 'services', submenu: []},
         {type: 'separator'},
         {role: 'hide'},

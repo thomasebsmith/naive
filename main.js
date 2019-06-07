@@ -14,6 +14,9 @@ const {
   forceShowWindows,
   forceDestroyWindow
 } = require("./utils/window");
+
+app.setName("Naive");
+
 const constants = require("./utils/constants");
 const setMenus = require("./utils/menus");
 const prefs = new (require("./utils/prefs"))();
@@ -25,6 +28,9 @@ let attemptingToQuit = false;
 //  process or other parts of the background process to manage windows,
 //  or preferences.
 const definedMessages = {
+  "openPreferences": () => {
+    console.log("TODO: Preferences window NYI");
+  },
   "openWindow": () => {
     openWindow(Windows.main);
   },
