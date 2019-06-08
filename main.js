@@ -29,7 +29,7 @@ let attemptingToQuit = false;
 //  or preferences.
 const definedMessages = {
   "openPreferences": () => {
-    console.log("TODO: Preferences window NYI");
+    openWindow(Windows.preferences);
   },
   "openWindow": () => {
     openWindow(Windows.main);
