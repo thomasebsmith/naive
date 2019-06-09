@@ -1,5 +1,5 @@
 body {
-  background: black;
-  color: white;
-  font-family: monospace;
+  background: var(--user-background);
+  color: var(--user-plain-color);
+  font-family: var(--user-font);
 }
