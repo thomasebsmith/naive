@@ -17,7 +17,7 @@ const setMenus = (sendAction) => {
       label: "File",
       submenu: [
         {
-          label: "Open project",
+          label: "Open project...",
           accelerator: "CommandOrControl+O",
           click: () => sendAction({type: "loadProject"})
         },
@@ -50,27 +50,39 @@ const setMenus = (sendAction) => {
   ];
   // On MacOS, a menu with the app name and basic MacOS app actions is
   //  available.
-  if (process.platform === 'darwin') {
+  if (process.platform === "darwin") {
     template.unshift({
       label: constants.appName,
       submenu: [
-        {role: 'about'},
-        {type: 'separator'},
+        {role: "about"},
+        {type: "separator"},
         {
           label: "Preferences...",
           accelerator: "CommandOrControl+,",
           click: () => sendAction({type: "openPreferences"})
         },
         {type: "separator"},
-        {role: 'services', submenu: []},
-        {type: 'separator'},
-        {role: 'hide'},
-        {role: 'hideothers'},
-        {role: 'unhide'},
-        {type: 'separator'},
-        {role: 'quit'}
+        {role: "services", submenu: []},
+        {type: "separator"},
+        {role: "hide"},
+        {role: "hideothers"},
+        {role: "unhide"},
+        {type: "separator"},
+        {role: "quit"}
       ]
     });
+  }
+  else {
+    // When not on MacOS, the preferences window can be opened from the
+    //  "Window" menu.
+    template[template.length - 1].submenu.push(
+      {type: "separator"},
+      {
+        label: "Preferences...",
+        accelerator: "CommandOrControl+,",
+        click: () => sendAction({type: "openPreferences"})
+      }
+    );
   }
   // A "Developer" menu is available if not in production.
   if (!isProduction) {
