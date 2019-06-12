@@ -56,6 +56,8 @@ exports.Windows = {
 //  objects.
 exports.openWindow = (type) => {
   let win = new BrowserWindow({
+    x: windows.length * 25 + 100,
+    y: 0,
     width: type.width,
     height: type.height,
     minWidth: type.minWidth,
