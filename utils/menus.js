@@ -89,7 +89,6 @@ const setMenus = (sendAction) => {
     template.push({
       label: "Developer",
       submenu: [
-        {role: "reload"},
         {role: "toggledevtools"},
         {
           label: "Force Windows to Show",
