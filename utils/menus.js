@@ -36,6 +36,7 @@ const setMenus = (sendAction) => {
     {role: "editMenu"},
     {
       label: "Window",
+      role: "window",
       submenu: [
         {
           label: "New Window",
@@ -46,6 +47,11 @@ const setMenus = (sendAction) => {
         {role: "minimize"},
         {role: "close"},
       ]
+    },
+    {
+      label: "Help",
+      role: "help",
+      submenu: []
     }
   ];
   // On MacOS, a menu with the app name and basic MacOS app actions is
