@@ -48,6 +48,13 @@ exports.Windows = {
     width: 400,
     height: 400,
     file: "views/preferences.html"
+  },
+  "help": {
+    minWidth: 250,
+    minHeight: 450,
+    width: 400,
+    height: 800,
+    file: "views/help.html"
   }
 };
 

@@ -51,7 +51,12 @@ const setMenus = (sendAction) => {
     {
       label: "Help",
       role: "help",
-      submenu: []
+      submenu: [
+        {
+          label: "Naive Help",
+          click: () => sendAction({type: "openHelp"})
+        }
+      ]
     }
   ];
   // On MacOS, a menu with the app name and basic MacOS app actions is

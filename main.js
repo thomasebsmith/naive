@@ -31,6 +31,9 @@ const definedMessages = {
   "openPreferences": () => {
     openWindow(Windows.preferences);
   },
+  "openHelp": () => {
+    openWindow(Windows.help);
+  },
   "openWindow": () => {
     openWindow(Windows.main);
   },
