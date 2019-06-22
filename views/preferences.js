@@ -53,3 +53,18 @@ window.addEventListener("load", () => {
     });
   }
 });
+
+const sanitizeToAlphanum = (string) => string.replace(/[^a-zA-Z]/g, "");
+
+document.addEventListener("DOMContentLoaded", () => { 
+  const tabsElement = document.querySelector(".tabs");
+  tabsElement.addEventListener("click", (event) => {
+    const oldSelectedTabContent =
+      document.querySelector(".selected.tab-content");
+    oldSelectedTabContent.classList.remove("selected");
+    const tabID = sanitizeToAlphanum(event.target.dataset.tab);
+    const contentToSelect =
+      document.querySelector(".tab-content[data-tab='" + tabID + "']");
+    contentToSelect.classList.add("selected");
+  });
+});

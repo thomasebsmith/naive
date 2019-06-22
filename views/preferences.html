@@ -11,9 +11,18 @@
     <!-- As specified in /main.js, this window has minWidth 300 and minHeight
          100 -->
     <header class="tabs">
-      <span class="selected tab">General</span>
-      <span class="tab">Editor</span>
-      <span class="tab">Themes</span>
+      <span class="selected tab" data-tab="general">General</span>
+      <span class="tab" data-tab="editor">Editor</span>
+      <span class="tab" data-tab="themes">Themes</span>
     </header>
+    <article class="selected tab-content" data-tab="general">
+      General tab content.
+    </article>
+    <article class="tab-content" data-tab="editor">
+      Editor tab content.
+    </article>
+    <article class="tab-content" data-tab="themes">
+      Themes tab content.
+    </article>
   </body>
 </html>

@@ -26,6 +26,14 @@ body {
 .selected.tab {
   /* TODO */
 }
+.tab-content {
+  display: none;
+}
+.selected.tab-content {
+  display: block;
+  margin: 5px;
+  width: calc(100vw - 2 * 5px);
+}
 .tab:hover {
   cursor: default;
 }
