@@ -11,29 +11,38 @@ body {
   display: flex;
   flex-direction: row;
   height: 50px;
-  justify-content: center;
+  justify-content: space-around;
   width: 100vw;
   background: var(--user-selection-background);
 }
+
 .tab {
   display: block;
+  flex: auto;
   height: 50px;
   line-height: 50px;
-  margin: auto;
   text-align: center;
   width: 50px;
 }
+
+.tab:not(:last-child) {
+  border-right: 1px solid var(--user-plain-color);
+}
+
 .selected.tab {
   /* TODO */
 }
+
 .tab-content {
   display: none;
 }
+
 .selected.tab-content {
   display: block;
   margin: 5px;
   width: calc(100vw - 2 * 5px);
 }
+
 .tab:hover {
   cursor: default;
 }
