@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!target.classList.contains("tab")) {
       return;
     }
+    document.querySelector(".selected.tab").classList.remove("selected");
     const oldSelectedTabContent =
       document.querySelector(".selected.tab-content");
     oldSelectedTabContent.classList.remove("selected");
@@ -70,5 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const contentToSelect =
       document.querySelector(".tab-content[data-tab='" + tabID + "']");
     contentToSelect.classList.add("selected");
+    const tabToSelect =
+      document.querySelector(".tab[data-tab='" + tabID + "']");
+    tabToSelect.classList.add("selected");
   });
 });

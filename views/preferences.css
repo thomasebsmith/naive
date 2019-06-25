@@ -8,17 +8,19 @@ body {
 
 .tabs {
   align-items: stretch;
+  background: var(--user-selection-background);
+  border-bottom: 1px solid var(--user-plain-color);
   display: flex;
   flex-direction: row;
   height: 50px;
   justify-content: space-around;
   width: 100vw;
-  background: var(--user-selection-background);
 }
 
 .tab {
   display: block;
   flex: auto;
+  font-weight: bold;
   height: 50px;
   line-height: 50px;
   text-align: center;
@@ -30,7 +32,7 @@ body {
 }
 
 .selected.tab {
-  /* TODO */
+  text-decoration: underline;
 }
 
 .tab-content {
