@@ -47,7 +47,9 @@ exports.Windows = {
     minHeight: 100,
     width: 400,
     height: 400,
-    file: "views/preferences.html"
+    file: "views/preferences.html",
+    minimizable: false,
+    maximizable: false
   },
   "help": {
     minWidth: 250,
@@ -62,16 +64,14 @@ exports.Windows = {
 //  type. The properties in type correspond to those in exports.Windows
 //  objects.
 exports.openWindow = (type) => {
-  let win = new BrowserWindow({
+  let file = type.file;
+  delete type.file;
+  let win = new BrowserWindow(Object.assign({
     x: windows.length * 25 + 100,
     y: 0,
-    width: type.width,
-    height: type.height,
-    minWidth: type.minWidth,
-    minHeight: type.minHeight,
     show: false // Don't show window until it is loaded
-  });
-  win.loadFile(type.file);
+  }, type));
+  win.loadFile(file);
   let id = windows.push(win) - 1;
   messageQueue.push([]);
   win.webContents.on("did-finish-load", () => {
