@@ -31,8 +31,8 @@ const constants = require("../utils/constants");
 const highlight = require("../utils/highlight");
 const {
   htmlFromArray,
-  HighlightedStream,
-  NestedElementStream
+  NestedElementStream,
+  nthLayeredChild
 } = require("../utils/htmlUtilities");
 const contentAction = require("../utils/contentAction");
 const { handleKeys } = require("../utils/keyhandling");
@@ -41,24 +41,13 @@ let language = "text/plain";
 let contentEl = null;
 let currentText = "";
 let cursorEl = null;
+let cursorIndex = null;
 let cursorPosition = null;
-
-const reposition = (startingElementIndex) => {
-  const stream = new NestedElementStream(contentEl);
-  for (let i = 0; i < startingElementIndex; ++i) {
-    stream.next();
-  }
-  let nextIndex = +stream.peek().dataset.startIndex;
-  while (stream.hasNext) {
-    stream.peek().dataset.startIndex = nextIndex;
-    nextIndex += stream.peek().textContent.length;
-    stream.next();
-  }
-};
+let tokenBlock = null;
 
 const rehighlight = (startingElementIndex) => {
-  reposition(startingElementIndex);
-  highlight(currentText, language, contentEl, startingElementIndex);
+  tokenBlock =
+    highlight(currentText, language, contentEl, startingElementIndex);
 };
 
 const remove = (elementIndex) => {
@@ -71,29 +60,22 @@ const getElementIndex = (position) => {
     // fall in the first element.
     return 0;
   }
-  const stream = new NestedElementStream(contentEl);
-  let i = 0;
-  while (stream.hasNext) {
-    let nextPosition = +stream.next().dataset.startIndex;
+  let i;
+  for (i = 0; i < tokenBlock.tokens.length; ++i) {
+    let nextPosition = tokenBlock.tokens[i].startIndex;
     if (nextPosition > position) {
       return i - 1;
     }
-    ++i;
   }
   return i - 1;
 };
 
-const getRelativePosition = (element, position) => {
-  const elementPosition = +element.dataset.startIndex;
-  return position - elementPosition;
+const getRelativePosition = (token, position) => {
+  return position - token.startIndex;
 };
 
 const getContentChildAt = (elementIndex) => {
-  const stream = new NestedElementStream(contentEl);
-  for (let i = 0; i < elementIndex; ++i) {
-    stream.next();
-  }
-  return stream.peek();
+  return nthLayeredChild(contentEl, elementIndex);
 };
 
 const messageQueue = [];
@@ -103,13 +85,15 @@ const actions = {
     if (position < 0) { position = 0; }
     const elementIndex = getElementIndex(position);
     const element = getContentChildAt(elementIndex);
+    const token = tokenBlock.tokens[elementIndex];
     const length = element.textContent.length;
 
     const actualPosition = Math.max(Math.min(
-      getRelativePosition(element, position),
+      getRelativePosition(token, position),
       length - 1,
     ), 0);
-    cursorPosition = Math.min(+element.dataset.startIndex + actualPosition);
+    cursorIndex = elementIndex;
+    cursorPosition = token.startIndex + actualPosition;
 
     if (cursorEl !== null && cursorEl.parentElement) {
       cursorEl.parentElement.textContent =
@@ -117,7 +101,7 @@ const actions = {
     }
     cursorEl = document.createElement("span");
     cursorEl.classList.add("cursor");
-    let elementText = element.textContent;
+    let elementText = token.text;
     const character = elementText.charAt(actualPosition);
     cursorEl.textContent = character;
     if (actualPosition === elementText.length - 1) {
@@ -136,37 +120,39 @@ const actions = {
     if (cursorEl === null) {
       cursorTo(0);
     }
-    const currentLineEl = cursorEl.parentElement.parentElement;
-    const nextLineEl = currentLineEl.nextSibling;
-    if (nextLineEl === null) {
-      return;
+    let lineOffset = tokenBlock.tokens[cursorIndex].startIndex;
+    for (let i = cursorIndex; i >= 0; --i) {
+      if (tokenBlock.tokens[i].startsNewLine) {
+        lineOffset -= tokenBlock.tokens[i].startIndex;
+        break;
+      }
     }
-    const lineOffset = cursorPosition -
-      +currentLineEl.firstChild.dataset.startIndex;
-    const startIndex = Math.min(
-      +nextLineEl.firstChild.dataset.startIndex + lineOffset,
-      +nextLineEl.lastChild.dataset.startIndex +
-        nextLineEl.lastChild.textContent.length - 1
-    );
-    actions.cursorTo(startIndex);
+    lineOffset += cursorPosition - tokenBlock.tokens[cursorIndex].startIndex;
+    for (let i = cursorIndex + 1; i < tokenBlock.tokens.length; ++i) {
+      if (tokenBlock.tokens[i].startsNewLine) {
+        actions.cursorTo(tokenBlock.tokens[i].startIndex + lineOffset);
+        return;
+      }
+    }
   },
   "cursorUp": () => {
     if (cursorEl === null) {
       cursorTo(0);
     }
-    const currentLineEl = cursorEl.parentElement.parentElement;
-    const prevLineEl = currentLineEl.previousSibling;
-    if (prevLineEl === null) {
-      return;
+    let lineOffset = tokenBlock.tokens[cursorIndex].startIndex;
+    let i;
+    for (i = cursorIndex; i >= 0; --i) {
+      if (tokenBlock.tokens[i].startsNewLine) {
+        lineOffset -= tokenBlock.tokens[i].startIndex;
+        break;
+      }
     }
-    const lineOffset = cursorPosition -
-      +currentLineEl.firstChild.dataset.startIndex;
-    const startIndex = Math.min(
-      +prevLineEl.firstChild.dataset.startIndex + lineOffset,
-      +prevLineEl.lastChild.dataset.startIndex +
-        prevLineEl.lastChild.textContent.length - 1
-    );
-    actions.cursorTo(startIndex);
+    lineOffset += cursorPosition - tokenBlock.tokens[cursorIndex].startIndex;
+    for (i--; i >= 0; --i) {
+      if (i === 0 || tokenBlock.tokens[i].startsNewLine) {
+        actions.cursorTo(tokenBlock.tokens[i].startIndex + lineOffset);
+      }
+    }
   },
   "cursorLeft": () => {
     actions.cursorTo(cursorPosition - 1);
@@ -175,7 +161,7 @@ const actions = {
     actions.cursorTo(cursorPosition + 1);
   },
   "get": (replyID) => {
-    const text = contentEl.textContent;
+    const text = currentText;
     parent.postMessage({
       replyID: replyID,
       result: text,
@@ -251,14 +237,12 @@ const actions = {
   "set": (content) => {
     currentText = content;
     contentEl.innerHTML = "";
-    const tokens = highlight(content, language);
-    let lineEl;
-    for (let line of tokens) {
-      lineEl = document.createElement("span");
-      lineEl.classList.add("line");
-      htmlFromArray(line, lineEl);
+    const block = highlight(content, language);
+    const html = block.toHTML();
+    for (const lineEl of html) {
       contentEl.appendChild(lineEl);
     }
+    tokenBlock = block;
     cursorEl = null;
     actions.cursorTo(0);
   },

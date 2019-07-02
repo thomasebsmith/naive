@@ -183,3 +183,17 @@ class HighlightedMergedStream extends Stream {
   }
 };
 exports.HighlightedMergedStream = HighlightedMergedStream;
+
+const nthLayeredChild = (parentEl, n) => {
+  let i = 0;
+  let lineIndex = 0;
+  while (lineIndex < parentEl.children.length) {
+    if (i + parentEl.children[lineIndex].children.length > n) {
+      return parentEl.children[lineIndex].children[n - i];
+    }
+    i += parentEl.children[lineIndex].children.length;
+    ++lineIndex;
+  }
+  return null;
+};
+exports.nthLayeredChild = nthLayeredChild;
