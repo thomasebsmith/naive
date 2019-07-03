@@ -137,11 +137,16 @@ class HighlightedBlock {
         countToReplace + " elements to replace";
     }
     toBeRemoved = lineToRemove.firstChild;
+    let anyRemoved = false;
     while (removedCount < countToReplace && toBeRemoved !== null) {
       let victim = toBeRemoved;
       toBeRemoved = toBeRemoved.nextSibling;
       victim.parentElement.removeChild(victim);
       ++removedCount;
+      anyRemoved = true;
+    }
+    if (!anyRemoved) {
+      lineToRemove = lineToRemove.previousSibling;
     }
 
     // Now, startingLine and lineToRemove should be adjacent lines, each
@@ -150,17 +155,23 @@ class HighlightedBlock {
     if (htmlToInsert.length <= 1) {
       // If there are no lines to insert (or only 1), join the
       //  starting/ending lines of the removed section.
-      let insertBeforeMe = lineToRemove.lastChild;
-      for (let i = 0; i < lineToRemove.children.length; ++i) {
-        let elementToMove = lineToRemove.children[i];
-        lineToRemove.removeChild(elementToMove);
-        startingLine.appendChild(elementToMove);
+      let insertBeforeMe = lineToRemove.firstChild;
+      if (anyRemoved && startingLine !== lineToRemove) {
+        for (let i = 0; i < lineToRemove.children.length; ++i) {
+          let elementToMove = lineToRemove.children[i];
+          lineToRemove.removeChild(elementToMove);
+          startingLine.appendChild(elementToMove);
+        }
+        lineToRemove.parentElement.removeChild(lineToRemove);
       }
-      insertBeforeMe = insertBeforeMe.nextSibling;
-      lineToRemove.parentElement.removeChild(lineToRemove);
       // Insert any applicable lines.
       if (htmlToInsert.length === 1) {
-        startingLine.insertBefore(htmlToInsert[0], insertBeforeMe);
+        for (let i = 0; i < htmlToInsert[0].children.length; ++i) {
+          startingLine.insertBefore(
+            htmlToInsert[0].children[i],
+            insertBeforeMe
+          );
+        }
       }
     }
     else {

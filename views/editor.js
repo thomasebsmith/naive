@@ -46,8 +46,13 @@ let cursorPosition = null;
 let tokenBlock = null;
 
 const rehighlight = (startingElementIndex) => {
-  tokenBlock =
-    highlight(currentText, language, contentEl, startingElementIndex);
+  tokenBlock = highlight(
+    currentText,
+    language,
+    contentEl,
+    startingElementIndex,
+    tokenBlock
+  );
 };
 
 const remove = (elementIndex) => {
@@ -175,9 +180,10 @@ const actions = {
     else {
       const elementIndex = getElementIndex(position - 1);
       const element = getContentChildAt(elementIndex);
-      const elementPosition = +element.dataset.startIndex;
+      const token = tokenBlock.tokens[elementIndex];
+      const elementPosition = token.startIndex;
       let elementContent = element.textContent;
-      const actualPosition = getRelativePosition(element, position);
+      const actualPosition = getRelativePosition(token, position);
       elementContent = elementContent.substring(0, actualPosition) + text +
         elementContent.substring(actualPosition);
       element.textContent = elementContent;
