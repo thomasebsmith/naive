@@ -103,10 +103,12 @@ const setMenus = (sendAction) => {
         {role: "toggledevtools"},
         {
           label: "Force Windows to Show",
+          accelerator: "CommandOrControl+Alt+F",
           click: () => sendAction({type: "forceShowWindows"})
         },
         {
           label: "Reset Preferences",
+          accelerator: "CommandOrControl+Alt+R",
           click: () => sendAction({type: "resetPreferences"})
         }
       ]
