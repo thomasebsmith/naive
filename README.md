@@ -19,11 +19,12 @@ more. A Vim emulation mode will also be added.
 
 #### Project TODOs
 - Store highlighting state as a JavaScript object rather than relying on the
-  DOM structure.
+  DOM structure (*in progress*).
 - Consider fast-inserting text without rehighlighting and rehighlighting
   when time is available.
 - Add true end-of-line insertion (including at the end of the file).
 - Implement addon API.
+- Add compatibility with other syntax highlighting APIs.
 
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
