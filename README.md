@@ -11,7 +11,7 @@ highlighting in more languages, autocomplete, addons, keyboard shortcuts, and
 more. A Vim emulation mode will also be added.
 
 #### Known Issues
-- Naive's open dialog does not always appear.
+- Naive's open dialog does not appear when there is no focused window.
 - Syntax highlighting does not work when inserting links in Markdown.
 - The current project is only remembered for one window.
 - Rehighlighting text isn't guaranteed to keep the text the same.
