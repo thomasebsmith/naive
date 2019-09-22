@@ -186,7 +186,7 @@ const actions = {
       const actualPosition = getRelativePosition(token, position);
       elementContent = elementContent.substring(0, actualPosition) + text +
         elementContent.substring(actualPosition);
-      element.textContent = elementContent;
+      element.textContent = token.text = elementContent;
       currentText = currentText.substring(0, elementPosition + actualPosition) +
         text + currentText.substring(elementPosition + actualPosition);
       rehighlight(elementIndex);

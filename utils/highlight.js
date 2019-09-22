@@ -97,6 +97,9 @@ class HighlightedBlock {
       ++startIndex;
     }
     if (!differencesFound) {
+      if (this.tokens.length !== blockToCompare.tokens.length) {
+        return [startIndex, this.tokens.length];
+      }
       return null;
     }
     let endOffset = 0;
@@ -106,7 +109,7 @@ class HighlightedBlock {
     }
     return [startIndex, this.tokens.length - endOffset];
   }
-    
+
   // firstTokenElement is the first element that overlaps with the given
   //  HighlightedBlock. It should be a *token* element, not a line element.
   // countToReplace is the number of HTML token elements that should be
@@ -125,6 +128,18 @@ class HighlightedBlock {
       ++removedCount;
     }
     let lineToRemove = startingLine.nextSibling;
+    if (removedCount >= countToReplace && toBeRemoved !== null) {
+      lineToRemove = document.createElement("span");
+      lineToRemove.classList.add("line");
+      startingLine.parentElement.insertBefore(lineToRemove,
+        startingLine.nextSibling);
+      while (toBeRemoved !== null) {
+        let toMove = toBeRemoved;
+        toBeRemoved = toBeRemoved.nextSibling;
+        startingLine.removeChild(toMove);
+        lineToRemove.appendChild(toMove);
+      }
+    }
     while (lineToRemove !== null && removedCount +
            lineToRemove.childElementCount <= countToReplace) {
       removedCount += lineToRemove.childElementCount;
@@ -137,16 +152,11 @@ class HighlightedBlock {
         countToReplace + " elements to replace";
     }
     toBeRemoved = lineToRemove.firstChild;
-    let anyRemoved = false;
-    while (removedCount < countToReplace && toBeRemoved !== null) {
+    while (removedCount < countToReplace) {
       let victim = toBeRemoved;
       toBeRemoved = toBeRemoved.nextSibling;
       victim.parentElement.removeChild(victim);
       ++removedCount;
-      anyRemoved = true;
-    }
-    if (!anyRemoved) {
-      lineToRemove = lineToRemove.previousSibling;
     }
 
     // Now, startingLine and lineToRemove should be adjacent lines, each
@@ -156,21 +166,18 @@ class HighlightedBlock {
       // If there are no lines to insert (or only 1), join the
       //  starting/ending lines of the removed section.
       let insertBeforeMe = lineToRemove.firstChild;
-      if (anyRemoved && startingLine !== lineToRemove) {
-        for (let i = 0; i < lineToRemove.children.length; ++i) {
-          let elementToMove = lineToRemove.children[i];
-          lineToRemove.removeChild(elementToMove);
-          startingLine.appendChild(elementToMove);
-        }
-        lineToRemove.parentElement.removeChild(lineToRemove);
+      while (lineToRemove.childElementCount !== 0) {
+        let elementToMove = lineToRemove.firstChild;
+        lineToRemove.removeChild(elementToMove);
+        startingLine.appendChild(elementToMove);
       }
+      lineToRemove.parentElement.removeChild(lineToRemove);
       // Insert any applicable lines.
       if (htmlToInsert.length === 1) {
-        for (let i = 0; i < htmlToInsert[0].children.length; ++i) {
-          startingLine.insertBefore(
-            htmlToInsert[0].children[i],
-            insertBeforeMe
-          );
+        while (htmlToInsert[0].childElementCount > 0) {
+          let toMove = htmlToInsert[0].firstChild;
+          htmlToInsert[0].removeChild(toMove);
+          startingLine.insertBefore(toMove, insertBeforeMe);
         }
       }
     }
@@ -178,17 +185,20 @@ class HighlightedBlock {
       // Otherwise, if there is more than 1 line to insert, insert the
       //  first line on startingLine, the last line on lineToRemove, and
       //  all the other lines in between.
-      for (let i = 0; i < htmlToInsert[0].childElementCount; ++i) {
-        let elementToMove = htmlToInsert[0].children[i];
+      if (htmlToInsert[0].childElementCount === 0 &&
+          startingLine.childElementCount === 0) {
+        htmlToInsert.shift();
+      }
+      while (htmlToInsert[0].childElementCount > 0) {
+        let elementToMove = htmlToInsert[0].firstChild;
         htmlToInsert[0].removeChild(elementToMove);
         startingLine.appendChild(elementToMove);
       }
       for (let i = 1; i < htmlToInsert.length - 1; ++i) {
         lineToRemove.parentElement.insertBefore(htmlToInsert[i], lineToRemove);
       }
-      for (let i = 0;
-           i < htmlToInsert[htmlToInsert.length - 1].childElementCount; ++i) {
-        let elementToMove = htmlToInsert[htmlToInsert.length - 1].children[i];
+      while (htmlToInsert[htmlToInsert.length - 1].childElementCount > 0) {
+        let elementToMove = htmlToInsert[htmlToInsert.length - 1].lastChild;
         htmlToInsert[htmlToInsert.length - 1].removeChild(elementToMove);
         lineToRemove.insertBefore(elementToMove, lineToRemove.firstChild);
       }
@@ -224,7 +234,7 @@ const formatHighlighter = (highlighter) => {
 const rehighlightHTML = (highlighter, oldBlock, newBlock, element) => {
   const changedRange = oldBlock.changedRange(newBlock);
   if (changedRange === null) {
-    return;
+    return newBlock;
   }
   const [startIndex, lastIndex] = changedRange;
   const firstTokenElement = nthLayeredChild(element, startIndex);
