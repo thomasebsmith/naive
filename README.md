@@ -18,8 +18,6 @@ more. A Vim emulation mode will also be added.
 - Inserting text sometimes messes up line breaks.
 
 #### Project TODOs
-- Store highlighting state as a JavaScript object rather than relying on the
-  DOM structure (*in progress*).
 - Consider fast-inserting text without rehighlighting and rehighlighting
   when time is available.
 - Add true end-of-line insertion (including at the end of the file).

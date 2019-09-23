@@ -71,6 +71,14 @@ class HighlightedBlock {
       html = token.toHTML();
       lines[lines.length - 1].appendChild(html);
     }
+    // If this block ends with a new line, add an empty line element to the
+    //  end.
+    if (this.tokens.length !== 0 &&
+        this.tokens[this.tokens.length - 1].text.endsWith("\n")) {
+      lineEl = document.createElement("span");
+      lineEl.classList.add("line");
+      lines.push(lineEl);
+    }
     return lines;
   }
   slice(startIndex = 0, endIndex = this.tokens.length) {
@@ -106,6 +114,9 @@ class HighlightedBlock {
     while (this.tokens[this.tokens.length - endOffset - 1].contentEquals(
         blockToCompare.tokens[blockToCompare.tokens.length - endOffset - 1])) {
       ++endOffset;
+    }
+    if (this.tokens.length - endOffset <= startIndex) {
+      endOffset = startIndex + 1;
     }
     return [startIndex, this.tokens.length - endOffset];
   }
@@ -162,6 +173,10 @@ class HighlightedBlock {
     // Now, startingLine and lineToRemove should be adjacent lines, each
     //  containing only the remaining tokens (if any).
     const htmlToInsert = this.toHTML();
+    if (htmlToInsert.length > 0 && htmlToInsert[0].childElementCount === 0 &&
+        startingLine.childElementCount === 0) {
+      htmlToInsert.shift();
+    }
     if (htmlToInsert.length <= 1) {
       // If there are no lines to insert (or only 1), join the
       //  starting/ending lines of the removed section.
@@ -185,10 +200,6 @@ class HighlightedBlock {
       // Otherwise, if there is more than 1 line to insert, insert the
       //  first line on startingLine, the last line on lineToRemove, and
       //  all the other lines in between.
-      if (htmlToInsert[0].childElementCount === 0 &&
-          startingLine.childElementCount === 0) {
-        htmlToInsert.shift();
-      }
       while (htmlToInsert[0].childElementCount > 0) {
         let elementToMove = htmlToInsert[0].firstChild;
         htmlToInsert[0].removeChild(elementToMove);
