@@ -156,6 +156,7 @@ const actions = {
     for (i--; i >= 0; --i) {
       if (i === 0 || tokenBlock.tokens[i].startsNewLine) {
         actions.cursorTo(tokenBlock.tokens[i].startIndex + lineOffset);
+        break;
       }
     }
   },
