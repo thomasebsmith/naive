@@ -106,7 +106,8 @@ class HighlightedBlock {
     }
     if (!differencesFound) {
       if (this.tokens.length !== blockToCompare.tokens.length) {
-        return [startIndex, this.tokens.length];
+        return [startIndex, this.tokens.length,
+                startIndex, blockToCompare.tokens.length];
       }
       return null;
     }
@@ -115,10 +116,13 @@ class HighlightedBlock {
         blockToCompare.tokens[blockToCompare.tokens.length - endOffset - 1])) {
       ++endOffset;
     }
-    if (this.tokens.length - endOffset <= startIndex) {
-      endOffset = startIndex + 1;
+    if (this.tokens.length - endOffset <= startIndex ||
+        blockToCompare.tokens.length - endOffset <= startIndex) {
+      endOffset = Math.min(this.tokens.length - startIndex - 1,
+                           blockToCompare.tokens.length - startIndex - 1);
     }
-    return [startIndex, this.tokens.length - endOffset];
+    return [startIndex, this.tokens.length - endOffset,
+            startIndex, blockToCompare.tokens.length - endOffset];
   }
 
   // firstTokenElement is the first element that overlaps with the given
@@ -247,13 +251,10 @@ const rehighlightHTML = (highlighter, oldBlock, newBlock, element) => {
   if (changedRange === null) {
     return newBlock;
   }
-  const [startIndex, lastIndex] = changedRange;
+  const [startIndex, lastIndex, newStartIdx, newLastIdx] = changedRange;
   const firstTokenElement = nthLayeredChild(element, startIndex);
   const countToReplace = lastIndex - startIndex;
-  const replaceWith = newBlock.slice(
-    startIndex,
-    newBlock.tokens.length - (oldBlock.tokens.length - lastIndex)
-  );
+  const replaceWith = newBlock.slice(newStartIdx, newLastIdx);
   replaceWith.replaceHTML(firstTokenElement, countToReplace);
   return newBlock;
 };
