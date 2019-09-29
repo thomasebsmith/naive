@@ -114,6 +114,10 @@ class HighlightedBlock {
     let endOffset = 0;
     while (this.tokens[this.tokens.length - endOffset - 1].contentEquals(
         blockToCompare.tokens[blockToCompare.tokens.length - endOffset - 1])) {
+      if (endOffset === this.tokens.length - 1 ||
+          endOffset === blockToCompare.tokens.length - 1) {
+        break;
+      }
       ++endOffset;
     }
     if (this.tokens.length - endOffset <= startIndex ||
