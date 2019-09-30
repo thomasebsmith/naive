@@ -14,7 +14,7 @@ more. A Vim emulation mode will also be added.
 - Naive's open dialog does not appear when there is no focused window.
 - The current project is only remembered for one window.
 - Many of the Edit menu items don't work (e.g. Paste and Match Styles, Delete).
-- Some UI elements act like regular text (they can be selected).
+- The cursor does not always appear when inserting at the very end of a file.
 
 #### Project TODOs
 - Add cursor movement via clicking and dragging.

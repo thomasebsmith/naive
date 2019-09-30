@@ -13,12 +13,14 @@ body {
 }
 
 #sidebar {
+  cursor: default;
   display: grid;
   grid-template-columns: 1fr 4fr;
   grid-template-rows: 1fr;
   grid-column: 1;
   grid-row: 1;
   height: 100%;
+  user-select: none;
 }
 
 #iframe-container {
