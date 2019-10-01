@@ -23,6 +23,9 @@ more. A Vim emulation mode will also be added.
 - Add true end-of-line insertion (including at the end of the file).
 - Implement addon API.
 - Add compatibility with other syntax highlighting APIs.
+- Add more keyboard shortcuts.
+- Add Vim emulation mode.
+- Add autocomplete.
 
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
