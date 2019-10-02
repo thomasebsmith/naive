@@ -18,14 +18,16 @@ more. A Vim emulation mode will also be added.
 
 #### Project TODOs
 - Add cursor movement via clicking and dragging.
-- Consider fast-inserting text without rehighlighting and rehighlighting
-  when time is available.
-- Add true end-of-line insertion (including at the end of the file).
 - Implement addon API.
 - Add compatibility with other syntax highlighting APIs.
 - Add more keyboard shortcuts.
 - Add Vim emulation mode.
 - Add autocomplete.
+
+#### In Progress
+- Add true end-of-line insertion (including at the end of the file).
+- Consider fast-inserting text without rehighlighting and rehighlighting
+  when time is available.
 
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
