@@ -59,7 +59,7 @@ const remove = (elementIndex) => {
   contentEl.removeChild(contentEl.children[elementIndex]);
 };
 
-const getElementIndex = (position) => {
+const getElementIndex = (position, limitToBounds = true) => {
   if (position < 0) {
     // Assume that all "out-of-bounds" positions before the start of the code
     // fall in the first element.
@@ -72,7 +72,7 @@ const getElementIndex = (position) => {
       return i - 1;
     }
   }
-  return i - 1;
+  return i - limitToBounds;
 };
 
 const getRelativePosition = (token, position) => {
@@ -88,9 +88,20 @@ const actions = {
   "cursorTo": (position) => {
     if (cursorEl !== null && position === cursorPosition) { return; }
     if (position < 0) { position = 0; }
-    const elementIndex = getElementIndex(position);
+    const elementIndex = getElementIndex(position, false);
     const element = getContentChildAt(elementIndex);
-    const token = tokenBlock.tokens[elementIndex];
+    let token = tokenBlock.tokens[elementIndex];
+    if (!token && element) {
+      // This should only occur when appending to the entire file
+      token = new highlight.HighlightedToken(
+        "--end-placeholder",
+        "--end-placeholder",
+        "\n",
+        tokenBlock.tokens[elementIndex - 1].startIndex +
+          tokenBlock.tokens[elementIndex - 1].text.length,
+        false
+      );
+    }
     const length = element.textContent.length;
 
     const actualPosition = Math.max(Math.min(
@@ -248,6 +259,12 @@ const actions = {
     const html = block.toHTML();
     for (const lineEl of html) {
       contentEl.appendChild(lineEl);
+    }
+    if (html.length !== 0) {
+      const fakeElement = document.createElement("span");
+      fakeElement.classList.add("--end-placeholder");
+      fakeElement.textContent = "\n";
+      html[html.length - 1].appendChild(fakeElement);
     }
     tokenBlock = block;
     cursorEl = null;

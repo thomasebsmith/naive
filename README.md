@@ -25,7 +25,6 @@ more. A Vim emulation mode will also be added.
 - Add autocomplete.
 
 #### In Progress
-- Add true end-of-line insertion (including at the end of the file).
 - Consider fast-inserting text without rehighlighting and rehighlighting
   when time is available.
 

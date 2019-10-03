@@ -166,9 +166,14 @@ class HighlightedBlock {
       lineToRemove = lineToRemove.nextSibling;
       victim.parentElement.removeChild(victim);
     }
-    if (lineToRemove === null) {
+    if (lineToRemove === null && removedCount < countToReplace) {
       throw "Invalid arguments to .replaceHTML(): there were not " +
         countToReplace + " elements to replace";
+    }
+    if (lineToRemove === null) {
+      lineToRemove = document.createElement("span");
+      lineToRemove.classList.add("line");
+      startingLine.parentElement.insertBefore(lineToRemove, null);
     }
     toBeRemoved = lineToRemove.firstChild;
     while (removedCount < countToReplace) {
@@ -368,7 +373,7 @@ function* generateHighlightedToken(highlighter, code, startIndex = 0) {
         tokenStartIndex,
         i !== 0
       );
-      tokenStartIndex += tokenLines[i].length;
+      tokenStartIndex += tokenLines[i].length + 1;
     }
   }
 }
@@ -439,5 +444,7 @@ const highlight = (code, language, element = null, index = null,
   }
   return defaultToken(code);
 };
+highlight.HighlightedToken = HighlightedToken;
+highlight.HighlightedBlock = HighlightedBlock;
 
 module.exports = highlight;
