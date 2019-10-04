@@ -155,15 +155,29 @@ const actions = {
     if (cursorEl === null) {
       cursorTo(0);
     }
-    let lineOffset = tokenBlock.tokens[cursorIndex].startIndex;
+    const cursorOffset = +(cursorIndex >= tokenBlock.tokens.length);
+    let token = tokenBlock.tokens[cursorIndex];
+    if (!token) {
+      // We must be at the end of the file, so move based on the previous
+      //  token
+      token = new highlight.HighlightedToken(
+        "--end-placeholder",
+        "--end-placeholder",
+        "\n",
+        tokenBlock.tokens[cursorIndex - 1].startIndex +
+          tokenBlock.tokens[cursorIndex - 1].text.length,
+        false
+      );
+    }
+    let lineOffset = token.startIndex;
     let i;
-    for (i = cursorIndex; i >= 0; --i) {
+    for (i = cursorIndex - cursorOffset; i >= 0; --i) {
       if (tokenBlock.tokens[i].startsNewLine) {
         lineOffset -= tokenBlock.tokens[i].startIndex;
         break;
       }
     }
-    lineOffset += cursorPosition - tokenBlock.tokens[cursorIndex].startIndex;
+    lineOffset += cursorPosition - token.startIndex;
     for (i--; i >= 0; --i) {
       if (i === 0 || tokenBlock.tokens[i].startsNewLine) {
         actions.cursorTo(tokenBlock.tokens[i].startIndex + lineOffset);
