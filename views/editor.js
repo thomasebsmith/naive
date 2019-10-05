@@ -323,6 +323,16 @@ document.addEventListener("DOMContentLoaded", () => {
     evaluateMessage(messageQueue[i]);
   }
   parent.postMessage(constants.contentLoaded, location.origin);
+  contentEl.addEventListener("click", (event) => {
+    if (event.button === 0) { // Left click
+      const colIndex = Array.of(event.target.parentElement.children).indexOf(
+        event.target);
+      const lineIndex = Array.of(
+        event.target.parentElement.parentElement.children).indexOf(
+        event.target.parentElement);
+      console.log("TODO: Move cursor to line ", lineIndex, " element ", colIndex);
+    }
+  });
 });
 
 handleKeys(window, contentAction);
