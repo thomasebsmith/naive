@@ -17,7 +17,7 @@ more. A Vim emulation mode will also be added.
 - The cursor does not always appear when inserting at the very end of a file.
 
 #### Project TODOs
-- Add cursor movement via clicking and dragging.
+- Add better selection.
 - Implement addon API.
 - Add compatibility with other syntax highlighting APIs.
 - Add more keyboard shortcuts.

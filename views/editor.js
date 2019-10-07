@@ -316,6 +316,17 @@ window.addEventListener("message", (event) => {
   }
 });
 
+const charOffset = (event) => {
+  const el = event.target;
+  const node = new Text(" ");
+  el.appendChild(node);
+  const rect = el.getBoundingClientRect();
+  const charWidth = rect.width / el.textContent.length;
+  const answer = (event.clientX - rect.left) / charWidth;
+  el.removeChild(node);
+  return Math.floor(answer);
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   loaded = true;
   contentEl = document.getElementById("content");
@@ -338,7 +349,8 @@ document.addEventListener("DOMContentLoaded", () => {
           index += line.childElementCount;
           line = line.previousElementSibling;
         }
-        actions.cursorTo(tokenBlock.tokens[index].startIndex);
+        const innerOffset = charOffset(event);
+        actions.cursorTo(tokenBlock.tokens[index].startIndex + innerOffset);
       }
     }
   });
