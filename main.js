@@ -1,6 +1,7 @@
 // main.js
 //
-// This file provides the background process for the app. It manages the //  open windows, shows prompts, shows menus, and quits the app when requested.
+// This file provides the background process for the app. It manages the
+//  open windows, shows prompts, shows menus, and quits the app when requested.
 
 // Imports
 const {app, BrowserWindow, dialog, ipcMain} = require("electron");

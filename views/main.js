@@ -58,7 +58,8 @@ const definedMessages = {
       // Check that the project location exists.
       fs.stat(projectPath, (err, stats) => {
         if (err) {
-          console.error("There was an error loading the project with path ", projectPath, ": ", err);
+          console.error("There was an error loading the project with path ",
+            projectPath, ": ", err);
         }
         else if (stats.isDirectory()){
           // If the selected path is a directory, open the project in that
@@ -243,7 +244,8 @@ const loadSidebarContent = (project, callback = noop) => {
   const projectName = project.name;
   fs.readdir(projectPath, (err, projectFiles) => {
     if (err) {
-      contentAction("set", "There was an error loading the file at " + filePath);
+      contentAction("set",
+        "There was an error loading the file at " + filePath);
       contentAction("setLanguage", "text/x-editor-error");
       console.warn("Could not load file ", filePath, "(error: ", e, ")");
     }
@@ -293,7 +295,8 @@ const reloadFileContent = (callback) => {
   if (selectedEl !== null) {
     selectedEl.classList.remove("selected");
   }
-  setTitle(constants.appName + " — " + currentProject.name + " — " + currentProject.selectedRelativePath);
+  setTitle(constants.appName + " — " + currentProject.name +
+    " — " + currentProject.selectedRelativePath);
   if (currentProject.selectedRelativePath === null) {
     contentAction("set", "No file is open");
     contentAction("setLanguage", "text/x-editor-error");
@@ -307,7 +310,10 @@ const reloadFileContent = (callback) => {
         el.classList.add("selected");
       }
     }
-    loadFileContent(path.join(currentProject.path, currentProject.selectedRelativePath), callback);
+    loadFileContent(
+      path.join(currentProject.path, currentProject.selectedRelativePath),
+      callback
+    );
   }
 };
 
