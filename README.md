@@ -14,7 +14,6 @@ more. A Vim emulation mode will also be added.
 - Naive's open dialog does not appear when there is no focused window.
 - The current project is only remembered for one window.
 - Many of the Edit menu items don't work (e.g. Paste and Match Styles, Delete).
-- The cursor does not always appear when inserting at the very end of a file.
 
 #### Project TODOs
 - Add better selection.
@@ -23,10 +22,6 @@ more. A Vim emulation mode will also be added.
 - Add more keyboard shortcuts.
 - Add Vim emulation mode.
 - Add autocomplete.
-
-#### In Progress
-- Consider fast-inserting text without rehighlighting and rehighlighting
-  when time is available.
 
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
