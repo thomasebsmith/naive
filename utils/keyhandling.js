@@ -5,7 +5,10 @@
 //  it dispatches an appropriate editor action via the contentAction function
 //  provided as an argument.
 exports.handleKeys = (target, contentAction) => {
-  target.addEventListener("keyup", (event) => {
+  target.addEventListener("keydown", (event) => {
+    if (event.metaKey || event.ctrlKey) {
+      return;
+    }
     switch (event.key) {
       // Cursor movement
       case "ArrowLeft":
