@@ -178,9 +178,13 @@ const actions = {
       }
     }
     lineOffset += cursorPosition - token.startIndex;
+    let tokenLineStart = tokenBlock.tokens[i].startIndex;
     for (i--; i >= 0; --i) {
       if (i === 0 || tokenBlock.tokens[i].startsNewLine) {
-        actions.cursorTo(tokenBlock.tokens[i].startIndex + lineOffset);
+        actions.cursorTo(Math.min(
+          tokenBlock.tokens[i].startIndex + lineOffset,
+          tokenLineStart - 1
+        ));
         break;
       }
     }
