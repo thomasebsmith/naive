@@ -146,7 +146,16 @@ const actions = {
     lineOffset += cursorPosition - tokenBlock.tokens[cursorIndex].startIndex;
     for (let i = cursorIndex + 1; i < tokenBlock.tokens.length; ++i) {
       if (tokenBlock.tokens[i].startsNewLine) {
-        actions.cursorTo(tokenBlock.tokens[i].startIndex + lineOffset);
+        let j;
+        for (j = i + 1; j < tokenBlock.tokens.length &&
+          !tokenBlock.tokens[j].startsNewLine; ++j) {}
+        --j;
+        let maxCursor = tokenBlock.tokens[j].startIndex +
+          tokenBlock.tokens[j].text.length - 1;
+        actions.cursorTo(Math.min(
+          tokenBlock.tokens[i].startIndex + lineOffset,
+          maxCursor
+        ));
         return;
       }
     }
