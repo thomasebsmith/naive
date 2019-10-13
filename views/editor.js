@@ -43,6 +43,9 @@ let currentText = "";
 let cursorEl = null;
 let cursorIndex = null;
 let cursorPosition = null;
+let cursorEndEl = null;
+let cursorEndIndex = null;
+let cursorEndPosition = null;
 let tokenBlock = null;
 
 const rehighlight = (startingElementIndex) => {
@@ -131,6 +134,9 @@ const actions = {
     range.setStart(node, actualPosition);
     range.setEnd(node, actualPosition);
     range.insertNode(cursorEl);
+    cursorEndEl = cursorEl;
+    cursorEndIndex = cursorIndex;
+    cursorEndPosition = cursorPosition;
   },
   "cursorDown": () => {
     if (cursorEl === null) {
