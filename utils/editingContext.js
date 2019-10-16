@@ -1,16 +1,19 @@
+const highlight = require("./highlight");
 const { nthLayeredChild } = require("./htmlUtilities");
 
 class Identifier {
-  constructor(token, element) {
+  constructor(token, element, index) {
     this.token = token;
     this.element = element;
+    this.index = index;
   }
 }
 
 class EditingContext {
-  constructor(document, tokenBlock) {
+  constructor(document, tokenBlock, contentElement) {
     this.document = document;
     this.tokenBlock = tokenBlock;
+    this.contentElement = contentElement;
   }
   tokenIndexOfPosition(position, options = {}) {
     if (position < 0) {
@@ -28,10 +31,21 @@ class EditingContext {
     return i - (!this.options.allowEndOfFile);
   }
   atPosition(position, options = {}) {
-    const index = tokenIndexOfPosition(position, options);
-    const token = this.tokenBlock.tokens[index];
+    const index = this.tokenIndexOfPosition(position, options);
     const element = nthLayeredChild(this.contentElement, index);
-    return new Identifier(token, element);
+    let token = this.tokenBlock.tokens[index];
+    if (!token) {
+      // We must be at the end of the file, so generate a dummy token.
+      token = new highlight.HighlightedToken(
+        "--end-placeholder",
+        "--end-placeholder",
+        "\n",
+        this.tokenBlock.tokens[index - 1].startIndex +
+          this.tokenBlock.tokens[index - 1].text.length,
+        false
+      );
+    }
+    return new Identifier(token, element, index);
   }
   createElement(type, options = {}) {
     switch (type) {

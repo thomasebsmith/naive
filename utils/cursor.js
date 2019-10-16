@@ -9,7 +9,7 @@ class Cursor {
     if (this.position === position) {
       return;
     }
-    if (position > 0) {
+    if (position < 0) {
       position = 0;
     }
     if (this.element !== null) {
@@ -29,11 +29,11 @@ class Cursor {
       isFinalCharacter: relativePosition === token.text.length - 1
     });
 
-    tokenElement.textContent = token.substring(0, relativePosition) +
-      token.substring(relativePosition + 1);
+    tokenElement.textContent = token.text.substring(0, relativePosition) +
+      token.text.substring(relativePosition + 1);
 
     const range = this.context.document.createRange();
-    const node = token.text.length === 0 ? tokenElement : 
+    const node = tokenElement.textContent.length === 0 ? tokenElement : 
       tokenElement.firstChild;
     range.setStart(node, relativePosition);
     range.setEnd(node, relativePosition);

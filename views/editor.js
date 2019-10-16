@@ -36,30 +36,24 @@ const {
 } = require("../utils/htmlUtilities");
 const contentAction = require("../utils/contentAction");
 const { handleKeys } = require("../utils/keyhandling");
+const { EditingContext } = require("../utils/editingContext");
+const { Cursor } = require("../utils/cursor");
 
 let language = "text/plain";
-let contentEl = null;
 let currentText = "";
-let cursorEl = null;
-let cursorIndex = null;
-let cursorPosition = null;
-let cursorEndEl = null;
-let cursorEndIndex = null;
-let cursorEndPosition = null;
-let tokenBlock = null;
+
+let contentEl = null;
+let editingContext = null;
+let cursor = null;
 
 const rehighlight = (startingElementIndex) => {
-  tokenBlock = highlight(
+  editingContext.tokenBlock = highlight(
     currentText,
     language,
     contentEl,
     startingElementIndex,
-    tokenBlock
+    editingContext.tokenBlock
   );
-};
-
-const remove = (elementIndex) => {
-  contentEl.removeChild(contentEl.children[elementIndex]);
 };
 
 const getElementIndex = (position, limitToBounds = true) => {
@@ -69,8 +63,8 @@ const getElementIndex = (position, limitToBounds = true) => {
     return 0;
   }
   let i;
-  for (i = 0; i < tokenBlock.tokens.length; ++i) {
-    let nextPosition = tokenBlock.tokens[i].startIndex;
+  for (i = 0; i < editingContext.tokenBlock.tokens.length; ++i) {
+    let nextPosition = editingContext.tokenBlock.tokens[i].startIndex;
     if (nextPosition > position) {
       return i - 1;
     }
@@ -89,77 +83,31 @@ const getContentChildAt = (elementIndex) => {
 const messageQueue = [];
 const actions = {
   "cursorTo": (position) => {
-    if (cursorEl !== null && position === cursorPosition) { return; }
-    if (position < 0) { position = 0; }
-    const elementIndex = getElementIndex(position, false);
-    const element = getContentChildAt(elementIndex);
-    let token = tokenBlock.tokens[elementIndex];
-    if (!token && element) {
-      // This should only occur when appending to the entire file
-      token = new highlight.HighlightedToken(
-        "--end-placeholder",
-        "--end-placeholder",
-        "\n",
-        tokenBlock.tokens[elementIndex - 1].startIndex +
-          tokenBlock.tokens[elementIndex - 1].text.length,
-        false
-      );
-    }
-    const length = element.textContent.length;
-
-    const actualPosition = Math.max(Math.min(
-      getRelativePosition(token, position),
-      length - 1,
-    ), 0);
-    cursorIndex = elementIndex;
-    cursorPosition = token.startIndex + actualPosition;
-
-    if (cursorEl !== null && cursorEl.parentElement) {
-      cursorEl.parentElement.textContent =
-        cursorEl.parentElement.textContent;
-    }
-    cursorEl = document.createElement("span");
-    cursorEl.classList.add("cursor");
-    let elementText = token.text;
-    const character = elementText.charAt(actualPosition);
-    cursorEl.textContent = character;
-    if (actualPosition === elementText.length - 1) {
-      cursorEl.classList.add("final-character");
-    }
-    element.textContent = elementText =
-      elementText.substring(0, actualPosition) +
-      elementText.substring(actualPosition + 1);
-    const range = document.createRange();
-    const node = elementText.length === 0 ? element : element.firstChild;
-    range.setStart(node, actualPosition);
-    range.setEnd(node, actualPosition);
-    range.insertNode(cursorEl);
-    cursorEndEl = cursorEl;
-    cursorEndIndex = cursorIndex;
-    cursorEndPosition = cursorPosition;
+    return cursor.moveTo(position);
   },
   "cursorDown": () => {
-    if (cursorEl === null) {
-      cursorTo(0);
+    if (cursor.identifier === null) {
+      cursor.moveTo(0);
     }
-    let lineOffset = tokenBlock.tokens[cursorIndex].startIndex;
-    for (let i = cursorIndex; i >= 0; --i) {
-      if (tokenBlock.tokens[i].startsNewLine) {
-        lineOffset -= tokenBlock.tokens[i].startIndex;
+    let lineOffset = cursor.identifier.token.startIndex;
+    for (let i = cursor.identifier.index; i >= 0; --i) {
+      if (editingContext.tokenBlock.tokens[i].startsNewLine) {
+        lineOffset -= editingContext.tokenBlock.tokens[i].startIndex;
         break;
       }
     }
-    lineOffset += cursorPosition - tokenBlock.tokens[cursorIndex].startIndex;
-    for (let i = cursorIndex + 1; i < tokenBlock.tokens.length; ++i) {
-      if (tokenBlock.tokens[i].startsNewLine) {
+    lineOffset += (cursor.position - cursor.identifier.token.startIndex);
+    for (let i = cursor.identifier.index + 1;
+         i < editingContext.tokenBlock.tokens.length; ++i) {
+      if (editingContext.tokenBlock.tokens[i].startsNewLine) {
         let j;
-        for (j = i + 1; j < tokenBlock.tokens.length &&
-          !tokenBlock.tokens[j].startsNewLine; ++j) {}
+        for (j = i + 1; j < editingContext.tokenBlock.tokens.length &&
+          !editingContext.tokenBlock.tokens[j].startsNewLine; ++j) {}
         --j;
-        let maxCursor = tokenBlock.tokens[j].startIndex +
-          tokenBlock.tokens[j].text.length - 1;
-        actions.cursorTo(Math.min(
-          tokenBlock.tokens[i].startIndex + lineOffset,
+        let maxCursor = editingContext.tokenBlock.tokens[j].startIndex +
+          editingContext.tokenBlock.tokens[j].text.length - 1;
+        cursor.moveTo(Math.min(
+          editingContext.tokenBlock.tokens[i].startIndex + lineOffset,
           maxCursor
         ));
         return;
@@ -167,37 +115,27 @@ const actions = {
     }
   },
   "cursorUp": () => {
-    if (cursorEl === null) {
+    if (cursor.identifier === null) {
       cursorTo(0);
     }
-    const cursorOffset = +(cursorIndex >= tokenBlock.tokens.length);
-    let token = tokenBlock.tokens[cursorIndex];
-    if (!token) {
-      // We must be at the end of the file, so move based on the previous
-      //  token
-      token = new highlight.HighlightedToken(
-        "--end-placeholder",
-        "--end-placeholder",
-        "\n",
-        tokenBlock.tokens[cursorIndex - 1].startIndex +
-          tokenBlock.tokens[cursorIndex - 1].text.length,
-        false
-      );
-    }
+    const cursorOffset = +(
+      cursor.identifier.index >= editingContext.tokenBlock.tokens.length
+    );
+    let token = cursor.identifier.token;
     let lineOffset = token.startIndex;
     let i;
-    for (i = cursorIndex - cursorOffset; i >= 0; --i) {
-      if (tokenBlock.tokens[i].startsNewLine) {
-        lineOffset -= tokenBlock.tokens[i].startIndex;
+    for (i = cursor.identifier.index - cursorOffset; i >= 0; --i) {
+      if (editingContext.tokenBlock.tokens[i].startsNewLine) {
+        lineOffset -= editingContext.tokenBlock.tokens[i].startIndex;
         break;
       }
     }
-    lineOffset += cursorPosition - token.startIndex;
-    let tokenLineStart = tokenBlock.tokens[i].startIndex;
+    lineOffset += cursor.position - token.startIndex;
+    let tokenLineStart = editingContext.tokenBlock.tokens[i].startIndex;
     for (i--; i >= 0; --i) {
-      if (i === 0 || tokenBlock.tokens[i].startsNewLine) {
+      if (i === 0 || editingContext.tokenBlock.tokens[i].startsNewLine) {
         actions.cursorTo(Math.min(
-          tokenBlock.tokens[i].startIndex + lineOffset,
+          editingContext.tokenBlock.tokens[i].startIndex + lineOffset,
           tokenLineStart - 1
         ));
         break;
@@ -205,10 +143,10 @@ const actions = {
     }
   },
   "cursorLeft": () => {
-    actions.cursorTo(cursorPosition - 1);
+    cursor.moveTo(cursor.position - 1);
   },
   "cursorRight": () => {
-    actions.cursorTo(cursorPosition + 1);
+    cursor.moveTo(cursor.position + 1);
   },
   "get": (replyID) => {
     const text = currentText;
@@ -225,7 +163,7 @@ const actions = {
     else {
       const elementIndex = getElementIndex(position - 1);
       const element = getContentChildAt(elementIndex);
-      const token = tokenBlock.tokens[elementIndex];
+      const token = editingContext.tokenBlock.tokens[elementIndex];
       const elementPosition = token.startIndex;
       let elementContent = element.textContent;
       const actualPosition = getRelativePosition(token, position);
@@ -235,19 +173,19 @@ const actions = {
       currentText = currentText.substring(0, elementPosition + actualPosition) +
         text + currentText.substring(elementPosition + actualPosition);
       rehighlight(elementIndex);
-      if (cursorPosition !== null && cursorPosition >= position) {
-        actions.cursorTo(cursorPosition + text.length);
+      if (cursor.identifier !== null && cursor.position >= position) {
+        cursor.moveBy(text.length);
       }
     }
   },
   "insertAtCursor": (text) => {
-    if (cursorPosition !== null) {
-      actions.insert(cursorPosition, text);
+    if (cursor.identifier !== null) {
+      actions.insert(cursor.position, text);
     }
   },
   "remove": (position, count) => {
     const elementIndex = getElementIndex(position);
-    const stream = new NestedElementStream(contentEl);
+    const stream = new NestedElementStream(editingContext.contentElement);
     for (let i = 0; i < elementIndex; ++i) {
       stream.next();
     }
@@ -269,19 +207,19 @@ const actions = {
       element = stream.next();
     }
     rehighlight(elementIndex);
-    if (cursorPosition !== null && position < cursorPosition) {
-      if (position + count >= cursorPosition) {
-        actions.cursorTo(position);
+    if (cursor.identifier !== null && position < cursor.position) {
+      if (position + count >= cursor.position) {
+        cursor.moveTo(position);
       }
       else {
-        actions.cursorTo(cursorPosition - count);
+        cursor.moveBy(-count);
       }
     }
   },
   "removeBeforeCursor": (count) => {
-    if (cursorPosition !== null) {
-      const removalStartPosition = Math.max(0, cursorPosition - count);
-      count = cursorPosition - removalStartPosition;
+    if (cursor.identifier !== null) {
+      const removalStartPosition = Math.max(0, cursor.position - count);
+      count = cursor.position - removalStartPosition;
       actions.remove(removalStartPosition, count);
     }
   },
@@ -299,9 +237,9 @@ const actions = {
       fakeElement.textContent = "\n";
       html[html.length - 1].appendChild(fakeElement);
     }
-    tokenBlock = block;
-    cursorEl = null;
-    actions.cursorTo(0);
+    editingContext.tokenBlock = block;
+    cursor.element = cursor.identifier = cursor.position = null;
+    cursor.moveTo(0);
   },
   "setLanguage": (lang) => {
     language = lang;
@@ -349,6 +287,8 @@ const charOffset = (event) => {
 document.addEventListener("DOMContentLoaded", () => {
   loaded = true;
   contentEl = document.getElementById("content");
+  editingContext = new EditingContext(document, null, contentEl);
+  cursor = new Cursor(editingContext);
   for (let i = 0; i < messageQueue.length; i++) {
     evaluateMessage(messageQueue[i]);
   }
@@ -369,7 +309,8 @@ document.addEventListener("DOMContentLoaded", () => {
           line = line.previousElementSibling;
         }
         const innerOffset = charOffset(event);
-        actions.cursorTo(tokenBlock.tokens[index].startIndex + innerOffset);
+        cursor.moveTo(editingContext.tokenBlock.tokens[index].startIndex +
+          innerOffset);
       }
     }
   });
