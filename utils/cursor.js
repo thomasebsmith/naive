@@ -12,7 +12,7 @@ class Cursor {
     if (position < 0) {
       position = 0;
     }
-    if (this.element !== null) {
+    if (this.element !== null && this.element.parentElement !== null) {
       const justText =
         this.context.document.createTextNode(this.element.textContent);
       this.element.parentElement.replaceChild(justText, this.element);
@@ -40,7 +40,7 @@ class Cursor {
     range.insertNode(this.element);
   }
   moveBy(positionDifference) {
-    return moveTo(this.position + positionDifference);
+    return this.moveTo(this.position + positionDifference);
   }
 }
 

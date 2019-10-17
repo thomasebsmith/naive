@@ -28,7 +28,7 @@ class EditingContext {
         return i - 1;
       }
     }
-    return i - (!this.options.allowEndOfFile);
+    return i - (!options.allowEndOfFile);
   }
   atPosition(position, options = {}) {
     const index = this.tokenIndexOfPosition(position, options);

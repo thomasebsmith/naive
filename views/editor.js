@@ -56,28 +56,8 @@ const rehighlight = (startingElementIndex) => {
   );
 };
 
-const getElementIndex = (position, limitToBounds = true) => {
-  if (position < 0) {
-    // Assume that all "out-of-bounds" positions before the start of the code
-    // fall in the first element.
-    return 0;
-  }
-  let i;
-  for (i = 0; i < editingContext.tokenBlock.tokens.length; ++i) {
-    let nextPosition = editingContext.tokenBlock.tokens[i].startIndex;
-    if (nextPosition > position) {
-      return i - 1;
-    }
-  }
-  return i - limitToBounds;
-};
-
 const getRelativePosition = (token, position) => {
   return position - token.startIndex;
-};
-
-const getContentChildAt = (elementIndex) => {
-  return nthLayeredChild(contentEl, elementIndex);
 };
 
 const messageQueue = [];
@@ -161,18 +141,16 @@ const actions = {
       actions.set(text);
     }
     else {
-      const elementIndex = getElementIndex(position - 1);
-      const element = getContentChildAt(elementIndex);
-      const token = editingContext.tokenBlock.tokens[elementIndex];
-      const elementPosition = token.startIndex;
-      let elementContent = element.textContent;
-      const actualPosition = getRelativePosition(token, position);
+      const identifier = editingContext.atPosition(position - 1);
+      const elementPosition = identifier.token.startIndex;
+      let elementContent = identifier.element.textContent;
+      const actualPosition = getRelativePosition(identifier.token, position);
       elementContent = elementContent.substring(0, actualPosition) + text +
         elementContent.substring(actualPosition);
-      element.textContent = token.text = elementContent;
+      identifier.element.textContent = identifier.token.text = elementContent;
       currentText = currentText.substring(0, elementPosition + actualPosition) +
         text + currentText.substring(elementPosition + actualPosition);
-      rehighlight(elementIndex);
+      rehighlight(identifier.index);
       if (cursor.identifier !== null && cursor.position >= position) {
         cursor.moveBy(text.length);
       }
@@ -184,7 +162,7 @@ const actions = {
     }
   },
   "remove": (position, count) => {
-    const elementIndex = getElementIndex(position);
+    const elementIndex = editingContext.tokenIndexOfPosition(position);
     const stream = new NestedElementStream(editingContext.contentElement);
     for (let i = 0; i < elementIndex; ++i) {
       stream.next();
