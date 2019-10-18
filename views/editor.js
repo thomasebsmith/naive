@@ -71,7 +71,8 @@ const actions = {
     }
     let lineOffset = cursor.identifier.token.startIndex;
     for (let i = cursor.identifier.index; i >= 0; --i) {
-      if (editingContext.tokenBlock.tokens[i].startsNewLine) {
+      if (editingContext.tokenBlock.tokens[i] &&
+        editingContext.tokenBlock.tokens[i].startsNewLine) {
         lineOffset -= editingContext.tokenBlock.tokens[i].startIndex;
         break;
       }
