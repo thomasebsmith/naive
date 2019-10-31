@@ -13,6 +13,6 @@
   "license": "MIT",
   "repository": "https://github.com/thomasebsmith/naive",
   "devDependencies": {
-    "electron": "^2.0.8"
+    "electron": "^2.0.18"
   }
 }
