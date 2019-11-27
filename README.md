@@ -22,6 +22,7 @@ more. A Vim emulation mode will also be added.
 - Add more keyboard shortcuts.
 - Add Vim emulation mode.
 - Add autocomplete.
+- Add support for more languages (Java, Rust, PHP, etc.)
 
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
