@@ -27,3 +27,9 @@ more. A Vim emulation mode will also be added.
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
 Markdown.
+
+#### Version History
+###### v0.1 (in development)
+- Added basic editing features.
+- Added syntax highlighting in C, C++, CSS, HTML, JavaScript, and Markdown.
+- Added file creation/opening/saving capabilities.
