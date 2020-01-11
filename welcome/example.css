@@ -1,0 +1,14 @@
+p {
+  color: red;
+}
+
+.foo#bar:hover {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+/* Only screens! */
+@media only screen {
+  body {
+    border: 2px dashed #FF00FF;
+  }
+}
