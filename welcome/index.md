@@ -10,5 +10,5 @@ search-and-replace, and command line tool integration.
 Naive is an open-source project
 [on Github](https://github.com/thomasebsmith/naive), made by Thomas Smith.
 
-Check out [example.css](./example.css) for another example of Naive's syntax
-highlighting.
+Check out [example.css](./example.css) or [example.cpp](./example.cpp) for
+more examples of Naive's syntax highlighting.
