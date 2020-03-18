@@ -21,8 +21,9 @@ more. A Vim emulation mode will also be added.
 - Add compatibility with other syntax highlighting APIs.
 - Add more keyboard shortcuts.
 - Add Vim emulation mode.
-- Add autocomplete.
+- Add context-sensitive autocomplete.
 - Add support for more languages (Java, Rust, PHP, etc.).
+- Add welcome files in all supported languages.
 - Add unit tests.
 - Add integration tests.
 - Add UI tests.
