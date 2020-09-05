@@ -1,5 +1,5 @@
 # Naive
-##### A simple, configurable text editor
+#### A simple, configurable text editor
 
 Naive is a simple, configurable text editor written in Electron. It strives to
 be intuitive yet easily extensible.
@@ -33,7 +33,13 @@ Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
 Markdown.
 
 #### Version History
-###### v0.1 (in development)
+###### v0.1 (in testing)
 - Added basic editing features.
 - Added syntax highlighting in C, C++, CSS, HTML, JavaScript, and Markdown.
 - Added file creation/opening/saving capabilities.
+
+###### v0.2
+- Add better selection.
+- Add unit tests.
+- Add integration tests.
+- Add UI tests.
