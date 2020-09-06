@@ -461,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
   sidebarEl = document.getElementById("sidebar");
   sidebarButtonsEl = document.getElementById("sidebar-buttons");
   filesEl = document.getElementById("files");
-  contentEl = document.getElementById("content");
+  contentEl = window.contentEl = document.getElementById("content");
   domLoaded = true;
   if (frameLoaded) {
     onContentLoaded();

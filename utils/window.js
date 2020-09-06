@@ -69,6 +69,11 @@ exports.openWindow = (type) => {
   let win = new BrowserWindow(Object.assign({
     x: windows.length * 25 + 100,
     y: 0,
+    webPreferences: {
+      enableRemoteModule: true,
+      nodeIntegration: true,
+      nodeIntegrationInSubFrames: true
+    },
     show: false // Don't show window until it is loaded
   }, type));
   win.loadFile(file);

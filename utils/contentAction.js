@@ -40,7 +40,9 @@ if (isHTML && isEditor) {
 //  contentWindow (i.e. the views/editor.html window).
 else if (isHTML) {
   contentAction = (action, ...args) => {
-    contentEl.contentWindow.postMessage({ action, args }, location.origin);
+    window.contentEl.contentWindow.postMessage(
+      { action, args }, location.origin
+    );
   };
 }
 
