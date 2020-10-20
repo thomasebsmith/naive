@@ -27,6 +27,7 @@ more. A Vim emulation mode will also be added.
 - Add unit tests.
 - Add integration tests.
 - Add UI tests.
+- Add localization.
 
 #### Supported Languages
 Naive provides syntax highlighting in C, C++, CSS, HTML, JavaScript, and
