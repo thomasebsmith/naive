@@ -58,7 +58,7 @@ const definedMessages = {
       defaultId: 1,
       message: "Are you sure you want to close this window? You have " +
         "unsaved changes that will be lost",
-    }, (response) => {
+    }).then(({response}) => {
       const DONT_SAVE = 1;
       if (response === DONT_SAVE) {
         forceDestroyWindow(windowID);

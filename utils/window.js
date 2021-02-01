@@ -64,8 +64,12 @@ exports.Windows = {
 //  type. The properties in type correspond to those in exports.Windows
 //  objects.
 exports.openWindow = (type) => {
+  // Extract the file, and then create a copy of type so that we don't
+  // unexpectedly modify it without the client of this function noticing.
   let file = type.file;
+  type = Object.assign({}, type);
   delete type.file;
+
   let win = new BrowserWindow(Object.assign({
     x: windows.length * 25 + 100,
     y: 0,
